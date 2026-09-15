@@ -1,0 +1,23 @@
+{
+  "name": "gyojeongham-measure",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "smoke": "tsx measure.ts --mock --mode full --concurrency 3",
+    "full": "tsx measure.ts --mode full --concurrency 1",
+    "changes": "tsx measure.ts --mode changes --concurrency 1",
+    "nocache": "tsx measure.ts --mode full --concurrency 1 --no-cache",
+    "sweep": "tsx measure.ts --mode full --concurrency 1 && tsx measure.ts --mode full --concurrency 3 && tsx measure.ts --mode full --concurrency 5 && tsx measure.ts --mode full --concurrency 10"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.124.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.2",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
