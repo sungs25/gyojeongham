@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import Anthropic from '@anthropic-ai/sdk';
+import { parseChanges } from '@/lib/parse';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -42,5 +43,19 @@ export async function POST(request: Request) {
     .map((block) => block.text)
     .join('');
 
-  return Response.json({ raw, usage: message.usage, stopReason: message.stop_reason });
+  // 사고가 max_tokens를 다 쓰면 본문이 0자로 온다
+  if (message.stop_reason === 'max_tokens' || raw.trim().length === 0) {
+    return Response.json(
+      { error: '응답 본문이 비었습니다', retryable: true },
+      { status: 502 },
+    );
+  }
+
+  try {
+    const changes = parseChanges(raw);
+    return Response.json({ changes, usage: message.usage });
+  } catch (error) {
+    const messageText = error instanceof Error ? error.message : String(error);
+    return Response.json({ error: messageText, retryable: true }, { status: 502 });
+  }
 }
