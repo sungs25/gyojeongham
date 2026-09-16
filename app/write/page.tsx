@@ -226,6 +226,21 @@ export default function WritePage() {
                   {axis.changes.length}건
                   {axis.revertedCount > 0 && ` · 되돌림 ${axis.revertedCount}`}
                 </span>
+                <button
+                  className="ghost small"
+                  onClick={(e) => {
+                    // summary 안의 버튼이라 접기·펼치기가 같이 일어나지 않게 막는다
+                    e.preventDefault();
+                    const allReverted = axis.revertedCount === axis.changes.length;
+                    dispatch({
+                      type: 'set-applied',
+                      ids: axis.changes.map((c) => c.id),
+                      applied: allReverted,
+                    });
+                  }}
+                >
+                  {axis.revertedCount === axis.changes.length ? '모두 다시 적용' : '모두 되돌리기'}
+                </button>
               </summary>
               <ul className="axis-items">
                 {axis.changes.map((c) => (

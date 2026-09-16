@@ -158,6 +158,7 @@ button { font: inherit; cursor: pointer; }
 .axis { border-bottom: 1px solid var(--line); }
 .axis-head {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 1rem;
   font-size: 0.9rem;
@@ -169,6 +170,7 @@ button { font: inherit; cursor: pointer; }
 .axis-head::before { content: '▸'; color: var(--ink-soft); }
 .axis[open] > .axis-head::before { content: '▾'; }
 .axis-count { margin-left: auto; font-weight: 400; color: var(--ink-soft); }
+.axis-head .ghost { font-weight: 400; }
 .axis-items { list-style: none; margin: 0; padding: 0; }
 
 .panel-item {

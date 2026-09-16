@@ -38,6 +38,7 @@ export type Action =
   | { type: 'chunk-error'; index: number }
   | { type: 'finish' }
   | { type: 'toggle'; id: string }
+  | { type: 'set-applied'; ids: string[]; applied: boolean }
   | { type: 'reset' };
 
 function setAt<T>(list: T[], index: number, value: T): T[] {
@@ -89,6 +90,16 @@ export function reducer(state: State, action: Action): State {
           c.id === action.id ? { ...c, applied: !c.applied } : c,
         ),
       };
+
+    case 'set-applied': {
+      const target = new Set(action.ids);
+      return {
+        ...state,
+        changes: state.changes.map((c) =>
+          target.has(c.id) ? { ...c, applied: action.applied } : c,
+        ),
+      };
+    }
 
     case 'reset':
       return initialState;
