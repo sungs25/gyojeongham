@@ -9,6 +9,7 @@ import type { RawChange } from './types';
 import { initialState, reducer, type Usage } from './reducer';
 import { ruleName } from '@/lib/rules';
 import { groupByAxis } from '@/lib/axes';
+import { buildChangeList, buildRedline } from '@/lib/copy';
 
 const CONCURRENCY = 10;
 const RETRY_LIMIT = 2;
@@ -44,6 +45,7 @@ export default function WritePage() {
   const [draft, setDraft] = useState('');
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [copied, setCopied] = useState<'result' | 'redline' | 'list' | null>(null);
    // 같은 변경을 다시 누르면 설명을 닫는다
     // 본문 하이라이트: 같은 변경을 다시 누르면 선택 해제, 새로 누르면 선택하고 패널을 연다
   function toggleFocus(id: string) {
@@ -56,12 +58,36 @@ export default function WritePage() {
   }
 
   // 패널 항목: 선택하고 원문 쪽 하이라이트로 스크롤한다
-  // 패널 항목: 선택하고 원문 쪽 하이라이트로 스크롤한다
   function selectFromPanel(id: string) {
     setFocusedId(id);
     document
       .querySelector(`.mark.before[data-change-id="${id}"]`)
       ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  
+  async function copy(kind: 'result' | 'redline' | 'list') {
+    try {
+      if (kind === 'redline') {
+        const { html, text } = buildRedline(state.source, state.changes);
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([text], { type: 'text/plain' }),
+          }),
+        ]);
+      } else {
+        const text =
+          kind === 'result'
+            ? applyChanges(state.source, state.changes)
+            : buildChangeList(state.changes);
+        await navigator.clipboard.writeText(text);
+      }
+      setCopied(kind);
+      setTimeout(() => setCopied((v) => (v === kind ? null : v)), 1500);
+    } catch (error) {
+      console.warn('복사 실패', error);
+    }
   }
   
   const segments = useMemo(
@@ -281,12 +307,14 @@ export default function WritePage() {
           <button className="ghost" onClick={() => setPanelOpen((v) => !v)}>
             변경 목록
           </button>
-          <button
-            className="ghost"
-            disabled={state.running}
-            onClick={() => navigator.clipboard.writeText(applyChanges(state.source, state.changes))}
-          >
-            교정본 복사
+                    <button className="ghost" disabled={state.running} onClick={() => copy('result')}>
+            {copied === 'result' ? '복사됨' : '교정본 복사'}
+          </button>
+          <button className="ghost" disabled={state.running} onClick={() => copy('redline')}>
+            {copied === 'redline' ? '복사됨' : '대조본 복사'}
+          </button>
+          <button className="ghost" disabled={state.running} onClick={() => copy('list')}>
+            {copied === 'list' ? '복사됨' : '목록 복사'}
           </button>
           <button className="primary" disabled={state.running} onClick={() => dispatch({ type: 'reset' })}>
             새 글

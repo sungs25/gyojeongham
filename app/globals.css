@@ -98,8 +98,15 @@ button { font: inherit; cursor: pointer; }
   border-top: 1px solid var(--line);
 }
 
-.bar-actions { display: flex; gap: 0.5rem; }
-.meta { font-size: 0.85rem; color: var(--ink-soft); }
+.bar-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+.meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
 
 .primary {
   background: var(--ink);
