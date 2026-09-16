@@ -42,6 +42,10 @@ export default function WritePage() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [draft, setDraft] = useState('');
   const [focusedId, setFocusedId] = useState<string | null>(null);
+   // 같은 변경을 다시 누르면 설명을 닫는다
+  function toggleFocus(id: string) {
+    setFocusedId((prev) => (prev === id ? null : id));
+  }
 
   const segments = useMemo(
     () => buildSegments(state.source, state.changes),
@@ -120,11 +124,11 @@ export default function WritePage() {
                   role="button"
                   tabIndex={0}
                   className={`mark before ${focusedId === segment.change.id ? 'focus' : ''}`}
-                  onClick={() => setFocusedId(segment.change.id)}
+                  onClick={() => toggleFocus(segment.change.id)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      setFocusedId(segment.change.id);
+                      toggleFocus(segment.change.id);
                     }
                   }}
                 >
@@ -147,11 +151,11 @@ export default function WritePage() {
                   role="button"
                   tabIndex={0}
                   className={`mark after ${focusedId === segment.change.id ? 'focus' : ''}`}
-                  onClick={() => setFocusedId(segment.change.id)}
+                  onClick={() => toggleFocus(segment.change.id)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      setFocusedId(segment.change.id);
+                      toggleFocus(segment.change.id);
                     }
                   }}
                   title={segment.change.note}
