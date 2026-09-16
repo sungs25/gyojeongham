@@ -1,4 +1,5 @@
 import type { Change, Chunk, RawChange } from '@/app/write/types';
+import { parseRuleIds } from '@/lib/rules';
 
 export type MatchResult = {
   matched: Change[];
@@ -26,7 +27,7 @@ export function matchChunkChanges(
       id: `${chunk.index}-${i}`,
       before: raw.before,
       after: raw.after,
-      ruleId: raw.rule_id,
+      ruleIds: parseRuleIds(raw.rule_id),
       note: raw.note,
       applied: true,
     };

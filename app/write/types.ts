@@ -13,7 +13,7 @@ export type Change = {
   end: number;
   before: string;
   after: string;
-  ruleId: string;
+  ruleIds: number[];
   note: string;
   applied: boolean;
 };

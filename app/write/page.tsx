@@ -7,6 +7,7 @@ import { runQueue } from '@/lib/queue';
 import { costKrw, summarize } from '@/lib/cost';
 import type { RawChange } from './types';
 import { initialState, reducer, type Usage } from './reducer';
+import { ruleName } from '@/lib/rules';
 
 const CONCURRENCY = 10;
 const RETRY_LIMIT = 2;
@@ -151,7 +152,7 @@ export default function WritePage() {
         <aside className="note">
           <p className="note-body">{focused.note}</p>
           <p className="note-meta">
-            {focused.before} → {focused.after} ({focused.ruleId})
+            {focused.before} → {focused.after} ({focused.ruleIds.map(ruleName).join(', ')})
           </p>
           <button className="ghost" onClick={() => dispatch({ type: 'toggle', id: focused.id })}>
             {focused.applied ? '되돌리기' : '다시 적용'}
