@@ -114,6 +114,8 @@ const client = new Anthropic();
 // ─────────────────────────────────────────────────────────────
 function chunk(text: string, maxChars: number): string[] {
   const paras = text
+    .replace(/\r\n/g, "\n")
+    .replace(/[\u200b-\u200d\ufeff]/g, "")
     .split(/\n\s*\n/)
     .map((p) => p.trim())
     .filter(Boolean);
@@ -218,6 +220,7 @@ async function runChunk(file: string, idx: number, text: string): Promise<Row> {
         ttft = m.ttft;
         stopReason = m.stopReason;
       } else {
+        console.log('입력 길이', text.length, '| 앞 40자', JSON.stringify(text.slice(0, 40)));
         const stream = client.messages.stream({
           model: MODEL,
           max_tokens: MAX_TOKENS,
