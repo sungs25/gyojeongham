@@ -78,13 +78,16 @@ export default function WritePage() {
     <div>
       <p>
         문단 {doneCount}/{state.chunks.length} · 변경 {state.changes.length}건
+        {state.unmatched.length > 0 && ` · 미매칭 ${state.unmatched.length}건`}
         {state.running ? ' · 교정 중...' : ' · 완료'}
       </p>
 
       <ul>
         {state.changes.map((c) => (
           <li key={c.id}>
-            {c.before} → {c.after} <small>({c.ruleId}) {c.note}</small>
+            <code>[{c.start}~{c.end}]</code> {c.before} → {c.after}{' '}
+            <small>({c.ruleId}) {c.note}</small>
+            {state.source.slice(c.start, c.end) !== c.before && <strong> ★불일치★</strong>}
           </li>
         ))}
       </ul>

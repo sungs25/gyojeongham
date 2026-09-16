@@ -1,3 +1,4 @@
+import { matchChunkChanges, resolveOverlaps } from '@/lib/match';
 import type { Change, Chunk, RawChange } from './types';
 
 export type ChunkState = 'pending' | 'running' | 'done' | 'error';
@@ -7,6 +8,7 @@ export type State = {
   chunks: Chunk[];
   chunkStates: ChunkState[];
   changes: Change[];
+  unmatched: Change[];
   running: boolean;
 };
 
@@ -15,6 +17,7 @@ export const initialState: State = {
   chunks: [],
   chunkStates: [],
   changes: [],
+  unmatched: [],
   running: false,
 };
 
@@ -48,22 +51,17 @@ export function reducer(state: State, action: Action): State {
       return { ...state, chunkStates: setAt(state.chunkStates, action.index, 'running') };
 
     case 'chunk-done': {
-      // 매핑은 다음 단계에서. 지금은 받은 것만 쌓는다.
-      const received: Change[] = action.raws.map((raw, i) => ({
-        id: `${action.index}-${i}`,
-        start: -1,
-        end: -1,
-        before: raw.before,
-        after: raw.after,
-        ruleId: raw.rule_id,
-        note: raw.note,
-        applied: true,
-      }));
+      const chunk = state.chunks[action.index];
+      if (!chunk) return state;
+
+      const found = matchChunkChanges(state.source, chunk, action.raws);
+      const resolved = resolveOverlaps(found.matched);
 
       return {
         ...state,
         chunkStates: setAt(state.chunkStates, action.index, 'done'),
-        changes: [...state.changes, ...received],
+        changes: [...state.changes, ...resolved.matched].sort((a, b) => a.start - b.start),
+        unmatched: [...state.unmatched, ...found.unmatched, ...resolved.unmatched],
       };
     }
 
