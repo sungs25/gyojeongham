@@ -42,6 +42,7 @@ export default function WritePage() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [draft, setDraft] = useState('');
   const [focusedId, setFocusedId] = useState<string | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
    // 같은 변경을 다시 누르면 설명을 닫는다
   function toggleFocus(id: string) {
     setFocusedId((prev) => (prev === id ? null : id));
@@ -168,7 +169,7 @@ export default function WritePage() {
         </section>
       </div>
 
-      {focused && (
+      {focused && !panelOpen && (
         <aside className="note">
           <p className="note-body">{focused.note}</p>
           <p className="note-meta">
@@ -179,6 +180,31 @@ export default function WritePage() {
           </button>
         </aside>
       )}
+      <aside className={`panel ${panelOpen ? 'open' : ''}`} inert={!panelOpen}>
+        <header className="panel-head">
+          <span>변경 {state.changes.length}건</span>
+          <button className="ghost" onClick={() => setPanelOpen(false)}>
+            닫기
+          </button>
+        </header>
+        <ul className="panel-list">
+          {state.changes.map((c) => (
+            <li
+              key={c.id}
+              className={`panel-item ${c.applied ? '' : 'off'} ${focusedId === c.id ? 'focus' : ''}`}
+            >
+              <p className="panel-rules">{c.ruleIds.map(ruleName).join(' · ')}</p>
+              <p className="panel-diff">
+                <del>{c.before}</del> → <ins>{c.after}</ins>
+              </p>
+              <p className="panel-note">{c.note}</p>
+              <button className="ghost" onClick={() => dispatch({ type: 'toggle', id: c.id })}>
+                {c.applied ? '되돌리기' : '다시 적용'}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </aside>
 
       <div className="bar">
         <span className="meta">
@@ -193,6 +219,9 @@ export default function WritePage() {
           {DEV_METRICS && ` · 캐시 쓰기 ${u.cacheWrites}/읽기 ${u.cacheReads}`}
         </span>
         <span className="bar-actions">
+          <button className="ghost" onClick={() => setPanelOpen((v) => !v)}>
+            변경 목록
+          </button>
           <button
             className="ghost"
             disabled={state.running}

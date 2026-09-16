@@ -73,7 +73,7 @@ export function reducer(state: State, action: Action): State {
         changes: [...state.changes, ...resolved.matched].sort((a, b) => a.start - b.start),
         unmatched: [...state.unmatched, ...found.unmatched, ...resolved.unmatched],
         usages: [...state.usages, action.usage],
-      };;
+      };
     }
 
     case 'chunk-error':
