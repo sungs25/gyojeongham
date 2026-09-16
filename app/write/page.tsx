@@ -8,6 +8,7 @@ import { costKrw, summarize } from '@/lib/cost';
 import type { RawChange } from './types';
 import { initialState, reducer, type Usage } from './reducer';
 import { ruleName } from '@/lib/rules';
+import { groupByAxis } from '@/lib/axes';
 
 const CONCURRENCY = 10;
 const RETRY_LIMIT = 2;
@@ -44,14 +45,31 @@ export default function WritePage() {
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
    // 같은 변경을 다시 누르면 설명을 닫는다
+    // 본문 하이라이트: 같은 변경을 다시 누르면 선택 해제, 새로 누르면 선택하고 패널을 연다
   function toggleFocus(id: string) {
-    setFocusedId((prev) => (prev === id ? null : id));
+    if (focusedId === id) {
+      setFocusedId(null);
+      return;
+    }
+    setFocusedId(id);
+    setPanelOpen(true);
   }
 
+  // 패널 항목: 선택하고 원문 쪽 하이라이트로 스크롤한다
+  // 패널 항목: 선택하고 원문 쪽 하이라이트로 스크롤한다
+  function selectFromPanel(id: string) {
+    setFocusedId(id);
+    document
+      .querySelector(`.mark.before[data-change-id="${id}"]`)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  
   const segments = useMemo(
     () => buildSegments(state.source, state.changes),
     [state.source, state.changes],
   );
+
+  const axes = useMemo(() => groupByAxis(state.changes), [state.changes]);
 
   async function run() {
     if (state.running) return;
@@ -112,7 +130,7 @@ export default function WritePage() {
 
   return (
     <main
-      className="page"
+      className={`page ${panelOpen ? 'panel-open' : ''}`}
       onClick={(e) => {
         // 하이라이트·설명·패널·하단 바 바깥을 누르면 선택을 푼다
         if ((e.target as HTMLElement).closest('.mark, .note, .panel, .bar')) return;
@@ -126,9 +144,10 @@ export default function WritePage() {
             {segments.map((segment) =>
               segment.type === 'plain' ? (
                 <span key={segment.key}>{segment.text}</span>
-              ) : (
+            ) : (
                   <span
                   key={segment.key}
+                  data-change-id={segment.change.id}
                   role="button"
                   tabIndex={0}
                   className={`mark before ${focusedId === segment.change.id ? 'focus' : ''}`}
@@ -153,9 +172,10 @@ export default function WritePage() {
             {segments.map((segment) =>
               segment.type === 'plain' ? (
                 <span key={segment.key}>{segment.text}</span>
-              ) : (
+            ) : (
                   <span
                   key={segment.key}
+                  data-change-id={segment.change.id}
                   role="button"
                   tabIndex={0}
                   className={`mark after ${focusedId === segment.change.id ? 'focus' : ''}`}
@@ -176,17 +196,6 @@ export default function WritePage() {
         </section>
       </div>
 
-      {focused && !panelOpen && (
-        <aside className="note">
-          <p className="note-body">{focused.note}</p>
-          <p className="note-meta">
-            {focused.before} → {focused.after} ({focused.ruleIds.map(ruleName).join(', ')})
-          </p>
-          <button className="ghost" onClick={() => dispatch({ type: 'toggle', id: focused.id })}>
-            {focused.applied ? '되돌리기' : '다시 적용'}
-          </button>
-        </aside>
-      )}
       <aside className={`panel ${panelOpen ? 'open' : ''}`} inert={!panelOpen}>
         <header className="panel-head">
           <span>변경 {state.changes.length}건</span>
@@ -194,23 +203,51 @@ export default function WritePage() {
             닫기
           </button>
         </header>
-        <ul className="panel-list">
-          {state.changes.map((c) => (
-            <li
-              key={c.id}
-              className={`panel-item ${c.applied ? '' : 'off'} ${focusedId === c.id ? 'focus' : ''}`}
-            >
-              <p className="panel-rules">{c.ruleIds.map(ruleName).join(' · ')}</p>
-              <p className="panel-diff">
-                <del>{c.before}</del> → <ins>{c.after}</ins>
-              </p>
-              <p className="panel-note">{c.note}</p>
-              <button className="ghost" onClick={() => dispatch({ type: 'toggle', id: c.id })}>
-                {c.applied ? '되돌리기' : '다시 적용'}
-              </button>
-            </li>
+
+        {focused && (
+          <section className="panel-selected">
+            <p className="panel-rules">{focused.ruleIds.map(ruleName).join(' · ')}</p>
+            <p className="panel-diff">
+              <del>{focused.before}</del> → <ins>{focused.after}</ins>
+            </p>
+            <p className="panel-note">{focused.note}</p>
+            <button className="ghost" onClick={() => dispatch({ type: 'toggle', id: focused.id })}>
+              {focused.applied ? '되돌리기' : '다시 적용'}
+            </button>
+          </section>
+        )}
+
+        <div className="panel-list">
+          {axes.map((axis) => (
+            <details key={axis.id} className="axis">
+              <summary className="axis-head">
+                <span>{axis.name}</span>
+                <span className="axis-count">
+                  {axis.changes.length}건
+                  {axis.revertedCount > 0 && ` · 되돌림 ${axis.revertedCount}`}
+                </span>
+              </summary>
+              <ul className="axis-items">
+                {axis.changes.map((c) => (
+                  <li
+                    key={c.id}
+                    className={`panel-item ${c.applied ? '' : 'off'} ${focusedId === c.id ? 'focus' : ''}`}
+                  >
+                    <button className="panel-pick" onClick={() => selectFromPanel(c.id)}>
+                      <del>{c.before}</del> → <ins>{c.after}</ins>
+                    </button>
+                    <button
+                      className="ghost small"
+                      onClick={() => dispatch({ type: 'toggle', id: c.id })}
+                    >
+                      {c.applied ? '되돌리기' : '다시 적용'}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </details>
           ))}
-        </ul>
+        </div>
       </aside>
 
       <div className="bar">
