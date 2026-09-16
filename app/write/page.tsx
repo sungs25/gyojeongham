@@ -115,13 +115,21 @@ export default function WritePage() {
               segment.type === 'plain' ? (
                 <span key={segment.key}>{segment.text}</span>
               ) : (
-                <button
+                  <span
                   key={segment.key}
+                  role="button"
+                  tabIndex={0}
                   className={`mark before ${focusedId === segment.change.id ? 'focus' : ''}`}
                   onClick={() => setFocusedId(segment.change.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setFocusedId(segment.change.id);
+                    }
+                  }}
                 >
                   {segment.change.before}
-                </button>
+                </span>
               ),
             )}
           </div>
@@ -134,14 +142,22 @@ export default function WritePage() {
               segment.type === 'plain' ? (
                 <span key={segment.key}>{segment.text}</span>
               ) : (
-                <button
+                  <span
                   key={segment.key}
+                  role="button"
+                  tabIndex={0}
                   className={`mark after ${focusedId === segment.change.id ? 'focus' : ''}`}
                   onClick={() => setFocusedId(segment.change.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setFocusedId(segment.change.id);
+                    }
+                  }}
                   title={segment.change.note}
                 >
                   {segment.change.after}
-                </button>
+                </span>
               ),
             )}
           </div>
