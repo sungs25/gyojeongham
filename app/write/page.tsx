@@ -111,7 +111,14 @@ export default function WritePage() {
   }
 
   return (
-    <main className="page">
+    <main
+      className="page"
+      onClick={(e) => {
+        // 하이라이트·설명·패널·하단 바 바깥을 누르면 선택을 푼다
+        if ((e.target as HTMLElement).closest('.mark, .note, .panel, .bar')) return;
+        setFocusedId(null);
+      }}
+    >
       <div className="split">
         <section className="pane">
           <h2 className="pane-title">원문</h2>
