@@ -5,40 +5,18 @@ import { cleanSource, splitIntoChunks } from '@/lib/chunk';
 import { applyChanges, buildSegments } from '@/lib/derive';
 import { runQueue } from '@/lib/queue';
 import { costKrw, summarize } from '@/lib/cost';
-import type { RawChange } from './types';
-import { initialState, reducer, type Usage } from './reducer';
+import { initialState, reducer } from './reducer';
 import { ruleName } from '@/lib/rules';
 import { groupByAxis } from '@/lib/axes';
 import { buildChangeList, buildRedline } from '@/lib/copy';
+import { ChunkError, createJob, requestChunk } from '@/lib/proofread-client';
 
 const CONCURRENCY = 10;
-const RETRY_LIMIT = 2;
+// 청크당 최대 시도 횟수. 서버(finish_chunk)는 3회째 실패에서 씨앗을 반환하므로 반드시 3
+const RETRY_LIMIT = 3;
 
 // 개발 중에만 원가·토큰을 하단 바에 띄운다. 배포 빌드에서는 꺼진다.
 const DEV_METRICS = process.env.NODE_ENV === 'development';
-
-async function requestChunk(text: string): Promise<{ raws: RawChange[]; usage: Usage }> {
-  const response = await fetch('/api/proofread', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data?.error ?? `요청 실패 (${response.status})`);
-  if (!Array.isArray(data?.changes)) throw new Error('changes 배열이 없습니다');
-
-  const u = data.usage ?? {};
-  return {
-    raws: data.changes as RawChange[],
-    usage: {
-      inputTokens: u.input_tokens ?? 0,
-      cacheCreationTokens: u.cache_creation_input_tokens ?? 0,
-      cacheReadTokens: u.cache_read_input_tokens ?? 0,
-      outputTokens: u.output_tokens ?? 0,
-      thinkingTokens: u.output_tokens_details?.thinking_tokens ?? 0,
-    },
-  };
-}
 
 export default function WritePage() {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -46,8 +24,12 @@ export default function WritePage() {
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [copied, setCopied] = useState<'result' | 'redline' | 'list' | null>(null);
-   // 같은 변경을 다시 누르면 설명을 닫는다
-    // 본문 하이라이트: 같은 변경을 다시 누르면 선택 해제, 새로 누르면 선택하고 패널을 연다
+  // 로그인·씨앗·반환 안내 문구
+  const [notice, setNotice] = useState<string | null>(null);
+  // 작업을 만드는 중 (교정하기 버튼 연타로 작업이 두 개 생기는 것을 막는다)
+  const [starting, setStarting] = useState(false);
+
+  // 본문 하이라이트: 같은 변경을 다시 누르면 선택 해제, 새로 누르면 선택하고 패널을 연다
   function toggleFocus(id: string) {
     if (focusedId === id) {
       setFocusedId(null);
@@ -65,7 +47,6 @@ export default function WritePage() {
       ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  
   async function copy(kind: 'result' | 'redline' | 'list') {
     try {
       if (kind === 'redline') {
@@ -89,7 +70,7 @@ export default function WritePage() {
       console.warn('복사 실패', error);
     }
   }
-  
+
   const segments = useMemo(
     () => buildSegments(state.source, state.changes),
     [state.source, state.changes],
@@ -98,32 +79,56 @@ export default function WritePage() {
   const axes = useMemo(() => groupByAxis(state.changes), [state.changes]);
 
   async function run() {
-    if (state.running) return;
+    if (state.running || starting) return;
 
     const source = cleanSource(draft);
     const chunks = splitIntoChunks(source);
     if (chunks.length === 0) return;
 
+    // 1. 서버에 작업을 만들고 씨앗을 잡는다
+    setNotice(null);
+    setStarting(true);
+    const job = await createJob(source);
+    setStarting(false);
+    if (!job.ok) {
+      setNotice(job.message);
+      return;
+    }
+
     dispatch({ type: 'start', source, chunks });
 
+    // 작업이 반환됐거나 로그인이 풀리면 남은 청크를 보내지 않는다
+    let stopMessage: string | null = null;
+
     await runQueue(chunks, CONCURRENCY, async (chunk) => {
+      if (stopMessage) {
+        dispatch({ type: 'chunk-error', index: chunk.index });
+        return;
+      }
       dispatch({ type: 'chunk-running', index: chunk.index });
 
       for (let attempt = 1; attempt <= RETRY_LIMIT; attempt += 1) {
         try {
-          const { raws, usage } = await requestChunk(chunk.text);
+          const { raws, usage } = await requestChunk(job.jobId, chunk.text);
           dispatch({ type: 'chunk-done', index: chunk.index, raws, usage });
           return;
         } catch (error) {
           console.warn(`청크 ${chunk.index} 시도 ${attempt} 실패`, error);
-          if (attempt === RETRY_LIMIT) {
+          // 네트워크 오류처럼 서버 응답이 없는 실패는 다시 보낸다
+          const retryable = !(error instanceof ChunkError) || error.retryable;
+          if (error instanceof ChunkError && error.stopMessage) {
+            stopMessage = error.stopMessage;
+          }
+          if (!retryable || stopMessage || attempt === RETRY_LIMIT) {
             dispatch({ type: 'chunk-error', index: chunk.index });
+            return;
           }
         }
       }
     });
 
     dispatch({ type: 'finish' });
+    if (stopMessage) setNotice(stopMessage);
   }
 
   const doneCount = state.chunkStates.filter((s) => s === 'done' || s === 'error').length;
@@ -145,9 +150,15 @@ export default function WritePage() {
           />
         </div>
         <div className="bar">
-          <span className="meta">{draft.length.toLocaleString()}자</span>
-          <button className="primary" disabled={draft.trim().length === 0} onClick={run}>
-            교정하기
+          <span className="meta">
+            {draft.length.toLocaleString()}자{notice && ` · ${notice}`}
+          </span>
+          <button
+            className="primary"
+            disabled={draft.trim().length === 0 || starting}
+            onClick={run}
+          >
+            {starting ? '시작하는 중...' : '교정하기'}
           </button>
         </div>
       </main>
@@ -170,8 +181,8 @@ export default function WritePage() {
             {segments.map((segment) =>
               segment.type === 'plain' ? (
                 <span key={segment.key}>{segment.text}</span>
-            ) : (
-                  <span
+              ) : (
+                <span
                   key={segment.key}
                   data-change-id={segment.change.id}
                   role="button"
@@ -198,8 +209,8 @@ export default function WritePage() {
             {segments.map((segment) =>
               segment.type === 'plain' ? (
                 <span key={segment.key}>{segment.text}</span>
-            ) : (
-                  <span
+              ) : (
+                <span
                   key={segment.key}
                   data-change-id={segment.change.id}
                   role="button"
@@ -299,6 +310,7 @@ export default function WritePage() {
             ` · 실패 ${state.chunkStates.filter((s) => s === 'error').length}개`}
           {state.running ? ' · 교정 중...' : ''}
           {` · ${state.source.length.toLocaleString()}자`}
+          {notice && ` · ${notice}`}
           {DEV_METRICS && ` · ${cost}원 · 출력 ${u.output.toLocaleString()}`}
           {DEV_METRICS && u.thinking > 0 && ` (사고 ${u.thinking.toLocaleString()})`}
           {DEV_METRICS && ` · 캐시 쓰기 ${u.cacheWrites}/읽기 ${u.cacheReads}`}
@@ -307,7 +319,7 @@ export default function WritePage() {
           <button className="ghost" onClick={() => setPanelOpen((v) => !v)}>
             변경 목록
           </button>
-                    <button className="ghost" disabled={state.running} onClick={() => copy('result')}>
+          <button className="ghost" disabled={state.running} onClick={() => copy('result')}>
             {copied === 'result' ? '복사됨' : '교정본 복사'}
           </button>
           <button className="ghost" disabled={state.running} onClick={() => copy('redline')}>
@@ -316,7 +328,14 @@ export default function WritePage() {
           <button className="ghost" disabled={state.running} onClick={() => copy('list')}>
             {copied === 'list' ? '복사됨' : '목록 복사'}
           </button>
-          <button className="primary" disabled={state.running} onClick={() => dispatch({ type: 'reset' })}>
+          <button
+            className="primary"
+            disabled={state.running}
+            onClick={() => {
+              setNotice(null);
+              dispatch({ type: 'reset' });
+            }}
+          >
             새 글
           </button>
         </span>
