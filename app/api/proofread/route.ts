@@ -17,6 +17,10 @@ const SYSTEM_PROMPT = readFileSync(
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+// 개발 중 반환 흐름 확인용. 켜면 모델을 부르지 않고 실패로 처리한다
+const FORCE_FAIL =
+  process.env.NODE_ENV === 'development' && process.env.PROOFREAD_FORCE_FAIL === '1';
+
 type ModelResult =
   | { ok: true; changes: RawChange[]; usage: Anthropic.Usage }
   | { ok: false; error: string; usage: Anthropic.Usage | null };
@@ -117,7 +121,10 @@ export async function POST(request: Request) {
   }
 
   // 3. 모델 호출
-  const result = await callModel(text);
+    // 3. 모델 호출
+  const result: ModelResult = FORCE_FAIL
+    ? { ok: false, error: '강제 실패 (개발용)', usage: null }
+    : await callModel(text);
 
   // 4. 결과와 usage를 기록한다. 전부 성공이면 commit, 3회째 실패면 release
   const { data: jobStatus, error: finishError } = await admin.rpc('finish_chunk', {

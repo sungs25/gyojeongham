@@ -33,7 +33,7 @@ export async function createJob(
       return { ok: true, jobId: data.jobId };
     }
     if (response.status === 401) {
-      return { ok: false, message: '로그인이 필요합니다. /login에서 로그인해 주세요.' };
+      return { ok: false, message: '로그인이 필요합니다. 오른쪽 위 로그인 버튼을 눌러 주세요.' };
     }
     if (response.status === 402) {
       return { ok: false, message: '씨앗이 부족합니다.' };

@@ -214,3 +214,30 @@ button { font: inherit; cursor: pointer; }
 @media (max-width: 900px) {
   .split { grid-template-columns: 1fr; }
 }
+
+/* 계정 표시 (4단계) */
+.account {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem var(--gap);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.account a { text-decoration: none; }
+.account-seed { color: var(--ink); font-weight: 600; }
+
+/* 로그인 화면 (4단계) */
+.login {
+  max-width: 22rem;
+  margin: 18vh auto 0;
+  padding: var(--gap);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.login h1 { margin: 0 0 0.5rem; font-size: 1.4rem; }
+.login-error { margin: 0; font-size: 0.85rem; color: #b3261e; }

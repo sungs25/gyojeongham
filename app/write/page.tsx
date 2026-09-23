@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useReducer, useState } from 'react';
+import { useMemo, useReducer, useState, useSyncExternalStore } from 'react';
 import { cleanSource, splitIntoChunks } from '@/lib/chunk';
 import { applyChanges, buildSegments } from '@/lib/derive';
 import { runQueue } from '@/lib/queue';
@@ -10,6 +10,8 @@ import { ruleName } from '@/lib/rules';
 import { groupByAxis } from '@/lib/axes';
 import { buildChangeList, buildRedline } from '@/lib/copy';
 import { ChunkError, createJob, requestChunk } from '@/lib/proofread-client';
+import { AccountBar } from './AccountBar';
+import { getDraft, getServerDraft, setDraft, subscribeDraft } from '@/lib/draft-store';
 
 const CONCURRENCY = 10;
 // 청크당 최대 시도 횟수. 서버(finish_chunk)는 3회째 실패에서 씨앗을 반환하므로 반드시 3
@@ -20,7 +22,8 @@ const DEV_METRICS = process.env.NODE_ENV === 'development';
 
 export default function WritePage() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [draft, setDraft] = useState('');
+  // 입력 중인 글은 탭 안 저장소에 둔다 (로그인하러 갔다 와도 남도록)
+  const draft = useSyncExternalStore(subscribeDraft, getDraft, getServerDraft);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [copied, setCopied] = useState<'result' | 'redline' | 'list' | null>(null);
@@ -28,6 +31,8 @@ export default function WritePage() {
   const [notice, setNotice] = useState<string | null>(null);
   // 작업을 만드는 중 (교정하기 버튼 연타로 작업이 두 개 생기는 것을 막는다)
   const [starting, setStarting] = useState(false);
+  // 올리면 계정 표시가 잔액을 다시 읽는다
+  const [balanceVersion, setBalanceVersion] = useState(0);
 
   // 본문 하이라이트: 같은 변경을 다시 누르면 선택 해제, 새로 누르면 선택하고 패널을 연다
   function toggleFocus(id: string) {
@@ -96,6 +101,8 @@ export default function WritePage() {
     }
 
     dispatch({ type: 'start', source, chunks });
+    // 씨앗이 잡혔으니 잔액을 다시 읽는다
+    setBalanceVersion((v) => v + 1);
 
     // 작업이 반환됐거나 로그인이 풀리면 남은 청크를 보내지 않는다
     let stopMessage: string | null = null;
@@ -129,6 +136,8 @@ export default function WritePage() {
 
     dispatch({ type: 'finish' });
     if (stopMessage) setNotice(stopMessage);
+    // 실패로 반환됐을 수 있으니 한 번 더 읽는다
+    setBalanceVersion((v) => v + 1);
   }
 
   const doneCount = state.chunkStates.filter((s) => s === 'done' || s === 'error').length;
@@ -140,6 +149,7 @@ export default function WritePage() {
   if (state.chunks.length === 0) {
     return (
       <main className="page">
+        <AccountBar refreshKey={balanceVersion} />
         <div className="editor">
           <textarea
             className="input"
@@ -174,6 +184,7 @@ export default function WritePage() {
         setFocusedId(null);
       }}
     >
+      <AccountBar refreshKey={balanceVersion} />
       <div className="split">
         <section className="pane">
           <h2 className="pane-title">원문</h2>
