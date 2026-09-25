@@ -81,6 +81,18 @@ function toUsageRow(usage: Anthropic.Usage | null) {
   };
 }
 
+// 변경 건수, 그리고 before가 청크 글에 없는 건수(화면에서 미매칭이 될 변경의 근사치).
+// 사용자 글은 저장하지 않으므로, 남의 글에서 매칭이 얼마나 실패하는지는 이 숫자로만 본다. 실패한 호출은 null
+function toCountRow(text: string, result: ModelResult) {
+  if (!result.ok) return { change_count: null, unmatched_count: null };
+  return {
+    change_count: result.changes.length,
+    unmatched_count: result.changes.filter(
+      (c) => c.before.length === 0 || !text.includes(c.before),
+    ).length,
+  };
+}
+
 export async function POST(request: Request) {
   // 1. 누가 요청했는지 확인
   const supabase = await createClient();
@@ -135,7 +147,7 @@ export async function POST(request: Request) {
     p_job: jobId,
     p_idx: started.idx,
     p_ok: result.ok,
-    p_usage: toUsageRow(result.usage),
+    p_usage: { ...toUsageRow(result.usage), ...toCountRow(text, result) },
   });
   if (finishError) console.error('finish_chunk 실패', finishError);
 
