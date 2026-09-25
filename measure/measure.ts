@@ -60,8 +60,12 @@ const EFFORT = flag("effort", "");
 const MODEL = flag("model", "claude-sonnet-5");
 const ONLY = flag("only", ""); // 특정 파일만
 
-const PROMPT_PATH = MODE === "full" ? "prompt-full.txt" : "prompt-changes.txt";
-const SYSTEM_PROMPT = fs.readFileSync(path.join(__dirname, PROMPT_PATH), "utf-8");
+// changes 모드는 서비스와 같은 파일(prompts/prompt-changes.txt)을 읽는다. 사본을 두지 않는다
+const PROMPT_PATH =
+  MODE === "full"
+    ? path.join(__dirname, "prompt-full.txt")
+    : path.join(__dirname, "..", "prompts", "prompt-changes.txt");
+const SYSTEM_PROMPT = fs.readFileSync(PROMPT_PATH, "utf-8");
 
 if (!MOCK) {
   const k = process.env.ANTHROPIC_API_KEY ?? "";

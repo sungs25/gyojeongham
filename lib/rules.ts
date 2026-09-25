@@ -1,4 +1,5 @@
-// 프롬프트의 15개 규칙 번호 → 화면에 보일 축 이름
+// 프롬프트(prompts/prompt-changes.txt)의 규칙 번호 → 화면에 보일 축 이름.
+// 프롬프트에 규칙을 추가하거나 번호를 바꾸면 여기도 같이 고친다.
 export const RULE_NAMES: Record<number, string> = {
   1: '군더더기',
   2: '어순',
@@ -24,11 +25,11 @@ export function ruleName(id: number): string {
   return RULE_NAMES[id] ?? '분류 없음';
 }
 
-// "1, 11" / "7번" / "" 등 형식에 기대지 않고 1~15 숫자만 뽑는다.
+// "1, 11" / "7번" / "" 등 형식에 기대지 않고 RULE_NAMES에 있는 번호만 뽑는다.
 export function parseRuleIds(raw: string): number[] {
   const ids = (raw.match(/\d+/g) ?? [])
     .map(Number)
-    .filter((n) => n >= 1 && n <= 15);
+    .filter((n) => n in RULE_NAMES);
   const unique = Array.from(new Set(ids)).sort((a, b) => a - b);
   return unique.length > 0 ? unique : [UNCLASSIFIED];
 }
