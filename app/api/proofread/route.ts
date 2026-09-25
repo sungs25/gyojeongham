@@ -15,6 +15,9 @@ const SYSTEM_PROMPT = readFileSync(
   'utf8',
 );
 
+// 프롬프트 버전: 파일 내용 지문의 앞 12자리. 프롬프트가 한 글자만 바뀌어도 달라진다
+const PROMPT_VERSION = sha256(SYSTEM_PROMPT).slice(0, 12);
+
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // 개발 중 반환 흐름 확인용. 켜면 모델을 부르지 않고 실패로 처리한다
@@ -74,6 +77,7 @@ function toUsageRow(usage: Anthropic.Usage | null) {
     cache_read_tokens: u.cache_read_input_tokens ?? 0,
     output_tokens: u.output_tokens ?? 0,
     thinking_tokens: u.output_tokens_details?.thinking_tokens ?? 0,
+    prompt_version: PROMPT_VERSION,
   };
 }
 
@@ -121,7 +125,6 @@ export async function POST(request: Request) {
   }
 
   // 3. 모델 호출
-    // 3. 모델 호출
   const result: ModelResult = FORCE_FAIL
     ? { ok: false, error: '강제 실패 (개발용)', usage: null }
     : await callModel(text);
