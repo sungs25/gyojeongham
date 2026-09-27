@@ -22,7 +22,7 @@ export default async function CreditsPage() {
       </a>
       <h1>씨앗 사기</h1>
       <p className="credits-note">
-        씨앗 1개로 5,000자까지 교정합니다. 씨앗은 로그인한 계정마다 따로 쌓이며, 지금은{' '}
+        씨앗 1개로 3,000자까지 교정합니다. 씨앗은 로그인한 계정마다 따로 쌓이며, 지금은{' '}
         <strong>{provider} 계정</strong>으로 로그인되어 있습니다.
       </p>
       <PaymentWidget customerKey={claims.sub} />

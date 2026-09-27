@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 
 export const runtime = 'nodejs';
 
-// 한 번에 받는 원문 상한. 씨앗 40개 분량
+// 한 번에 받는 원문 상한 (20만 자)
 const MAX_SOURCE_CHARS = 200_000;
 
 export async function POST(request: Request) {
