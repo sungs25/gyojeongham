@@ -48,6 +48,9 @@ export function AccountBar({ refreshKey }: { refreshKey: number }) {
       )}
       {account.kind === 'user' && (
         <>
+          <span>
+            씨앗 <span className="account-seed">{account.balance}</span>개
+          </span>
           <a className="ghost small" href="/credits">
             씨앗 사기
           </a>
