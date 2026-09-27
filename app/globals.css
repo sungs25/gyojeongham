@@ -276,3 +276,5 @@ button { font: inherit; cursor: pointer; }
 .product-sub { font-size: 0.8rem; color: var(--ink-soft); }
 .product-price { margin-top: 0.25rem; font-weight: 600; }
 .credits-pay { width: 100%; margin-top: var(--gap); padding: 0.75rem; }
+
+.credits-error { margin: var(--gap) 0 0; font-size: 0.85rem; color: #b3261e; }
