@@ -54,6 +54,9 @@ export function AccountBar({ refreshKey }: { refreshKey: number }) {
           <a className="ghost small" href="/credits">
             씨앗 사기
           </a>
+          <a className="ghost small" href="/account">
+            내 계정
+          </a>
           <button type="button" className="ghost small" onClick={signOut}>
             로그아웃
           </button>

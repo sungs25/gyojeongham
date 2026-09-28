@@ -278,3 +278,10 @@ button { font: inherit; cursor: pointer; }
 .credits-pay { width: 100%; margin-top: var(--gap); padding: 0.75rem; }
 
 .credits-error { margin: var(--gap) 0 0; font-size: 0.85rem; color: #b3261e; }
+
+
+/* 내 계정 (6단계) */
+.account-danger-title { margin: calc(var(--gap) * 2) 0 0.5rem; font-size: 1.05rem; }
+.account-danger-list { padding-left: 1.2rem; }
+.account-confirm { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
+.account-delete { margin-top: var(--gap); color: #b3261e; border-color: #e6b8b4; }
