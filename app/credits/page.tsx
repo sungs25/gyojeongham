@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { PaymentWidget } from './PaymentWidget';
+import { Hamster } from '@/app/components/Hamster';
 
 const PROVIDER_NAMES: Record<string, string> = { kakao: '카카오', google: '구글' };
 
@@ -21,6 +22,7 @@ export default async function CreditsPage() {
         ← 교정 화면으로
       </a>
       <h1>씨앗 사기</h1>
+      <Hamster scene="seed" line="교정햄이 씨앗 먹고 힘낼 수 있게 도와주세요!" />
       <p className="credits-note">
         씨앗 1개로 3,000자까지 교정합니다. 씨앗은 로그인한 계정마다 따로 쌓이며, 지금은{' '}
         <strong>{provider} 계정</strong>으로 로그인되어 있습니다.

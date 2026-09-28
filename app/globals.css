@@ -245,7 +245,7 @@ button { font: inherit; cursor: pointer; }
 
 /* 씨앗 구매 (6단계) */
 .credits { max-width: 36rem; margin: 0 auto; padding: var(--gap); }
-.credits h1 { margin: 0.75rem 0 0.5rem; font-size: 1.4rem; }
+.credits h1 { margin: 1.25rem 0 1rem; font-size: 1.4rem; }
 .credits-back { font-size: 0.85rem; color: var(--ink-soft); text-decoration: none; }
 .credits-note { margin: 0 0 var(--gap); font-size: 0.9rem; line-height: 1.7; color: var(--ink-soft); }
 .credits-note strong { color: var(--ink); }
@@ -389,3 +389,12 @@ button { font: inherit; cursor: pointer; }
   background: rgba(252, 252, 250, 0.85); /* --paper를 반투명하게 */
 }
 .panel-open .hamster-stage { display: none; }
+
+
+/* 씨앗 햄스터: 연한 씨앗색 카드에 담아 위아래 글과 왼쪽 선을 맞춘다 */
+.credits .hamster {
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--seed-wash);
+  border-radius: 12px;
+}
