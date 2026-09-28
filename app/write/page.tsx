@@ -11,6 +11,7 @@ import { groupByAxis } from '@/lib/axes';
 import { buildChangeList, buildRedline } from '@/lib/copy';
 import { ChunkError, createJob, requestChunk } from '@/lib/proofread-client';
 import { AccountBar } from './AccountBar';
+import { Hamster } from '@/app/components/Hamster';
 import { getDraft, getServerDraft, setDraft, subscribeDraft } from '@/lib/draft-store';
 
 const CONCURRENCY = 10;
@@ -146,11 +147,12 @@ export default function WritePage() {
   const u = summarize(state.usages);
   const focused = state.changes.find((c) => c.id === focusedId) ?? null;
 
-  if (state.chunks.length === 0) {
+    if (state.chunks.length === 0) {
     return (
       <main className="page">
         <AccountBar refreshKey={balanceVersion} />
         <div className="editor">
+          <Hamster scene="ready" line="이 교정햄에게 맡겨줘! 뭐든지 다 해줄게." />
           <textarea
             className="input"
             value={draft}
