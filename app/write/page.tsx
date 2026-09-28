@@ -142,6 +142,7 @@ export default function WritePage() {
   }
 
   const doneCount = state.chunkStates.filter((s) => s === 'done' || s === 'error').length;
+  const errorCount = state.chunkStates.filter((s) => s === 'error').length;
   const appliedCount = state.changes.filter((c) => c.applied).length;
   const cost = Math.round(costKrw(state.usages));
   const u = summarize(state.usages);
@@ -314,6 +315,23 @@ export default function WritePage() {
           ))}
         </div>
       </aside>
+
+      {/* 교정 중에는 화면 가운데서 종이를 비교하고, 끝나면 오른쪽 아래로 가서 짜잔 한다 */}
+      {state.running ? (
+        <div className="hamster-stage">
+          <Hamster
+            scene="working"
+            line={`꼼꼼히 비교하는 중... (${doneCount}/${state.chunks.length})`}
+          />
+        </div>
+      ) : (
+        <Hamster
+          className="hamster-float"
+          scale={2}
+          scene={errorCount > 0 ? 'ready' : 'done'}
+          line={errorCount > 0 ? '몇 문단은 끝내 못 고쳤어.' : '짜잔! 다 고쳤어.'}
+        />
+      )}
 
       <div className="bar">
         <span className="meta">

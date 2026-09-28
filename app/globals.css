@@ -333,3 +333,59 @@ button { font: inherit; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   .hamster-frame2 { animation: none; opacity: 0; }
 }
+
+
+/* 결과 화면: 오른쪽 아래, 하단 바 바로 위에 떠 있는 햄스터 */
+.hamster-float {
+  position: fixed;
+  right: var(--gap);
+  bottom: calc(var(--bar-h) + 0.75rem);
+  flex-direction: row-reverse;
+  pointer-events: none; /* 밑에 깔린 글을 누르거나 고르는 데 방해하지 않게 */
+}
+.hamster-float .hamster-line::before {
+  left: auto;
+  right: -6px;
+  border-left: none;
+  border-bottom: none;
+  border-right: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+}
+/* 햄스터 뒤로 글자가 비쳐 보이지 않게 종이색 받침을 깐다 */
+.hamster-float .hamster-sprite {
+  background: var(--paper);
+  border-radius: 12px;
+  box-shadow: 0 0 0 6px var(--paper);
+}
+.panel-open .hamster-float { display: none; }
+/* 마지막 줄까지 햄스터 위로 올려 읽을 수 있게 */
+.page:has(.hamster-float) { padding-bottom: calc(var(--bar-h) + 8rem); }
+
+/* 완료: 두 번 통통 튀고, 말풍선은 4초 뒤 사라진다 */
+.hamster-done .hamster-sprite { animation: hamster-hop 0.5s ease-out 2; }
+@keyframes hamster-hop {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-8px); }
+}
+.hamster-float.hamster-done .hamster-line { animation: hamster-fade 4s forwards; }
+@keyframes hamster-fade {
+  0%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hamster-done .hamster-sprite { animation: none; }
+}
+
+
+/* 교정 중: 화면 가운데 무대. 뒤의 글은 흐리게 가린다 (하단 바는 가리지 않는다) */
+.hamster-stage {
+  position: fixed;
+  inset: 0 0 var(--bar-h) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gap);
+  background: rgba(252, 252, 250, 0.85); /* --paper를 반투명하게 */
+}
+.panel-open .hamster-stage { display: none; }
