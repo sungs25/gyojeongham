@@ -398,3 +398,35 @@ button { font: inherit; cursor: pointer; }
   background: var(--seed-wash);
   border-radius: 12px;
 }
+
+
+/* 하단 바의 복사 버튼: 넓은 화면에서는 셋을 나란히, 좁은 화면에서는 "복사" 하나로 접는다 */
+.copy-toggle { display: none; }
+.copy-group { display: flex; gap: 0.5rem; }
+
+@media (max-width: 900px) {
+  /* 하단 바를 두 줄로: 위는 진행 상황, 아래는 버튼 */
+  :root { --bar-h: 5.75rem; }
+  .bar {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+  }
+  .bar-actions { justify-content: flex-end; }
+  .copy-toggle { display: inline-block; }
+  .copy-group {
+    display: none;
+    position: absolute;
+    right: 1rem;
+    bottom: calc(100% + 0.5rem);
+    flex-direction: column;
+    padding: 0.5rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+  .copy-group.open { display: flex; }
+}

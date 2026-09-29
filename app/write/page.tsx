@@ -28,6 +28,8 @@ export default function WritePage() {
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [copied, setCopied] = useState<'result' | 'redline' | 'list' | null>(null);
+  // 좁은 화면에서 복사 버튼 셋을 접어 둔 메뉴가 열려 있는지
+  const [copyOpen, setCopyOpen] = useState(false);
   // 로그인·씨앗·반환 안내 문구
   const [notice, setNotice] = useState<string | null>(null);
   // 작업을 만드는 중 (교정하기 버튼 연타로 작업이 두 개 생기는 것을 막는다)
@@ -182,9 +184,10 @@ export default function WritePage() {
     <main
       className={`page ${panelOpen ? 'panel-open' : ''}`}
       onClick={(e) => {
-        // 하이라이트·설명·패널·하단 바 바깥을 누르면 선택을 푼다
+        // 하이라이트·설명·패널·하단 바 바깥을 누르면 선택을 풀고, 열린 복사 메뉴를 닫는다
         if ((e.target as HTMLElement).closest('.mark, .note, .panel, .bar')) return;
         setFocusedId(null);
+        setCopyOpen(false);
       }}
     >
       <AccountBar refreshKey={balanceVersion} />
@@ -350,20 +353,31 @@ export default function WritePage() {
           <button className="ghost" onClick={() => setPanelOpen((v) => !v)}>
             변경 목록
           </button>
-          <button className="ghost" disabled={state.running} onClick={() => copy('result')}>
-            {copied === 'result' ? '복사됨' : '교정본 복사'}
+          {/* 좁은 화면에서는 복사 버튼 셋을 "복사" 버튼 하나 아래로 접는다 */}
+          <button
+            className="ghost copy-toggle"
+            disabled={state.running}
+            onClick={() => setCopyOpen((v) => !v)}
+          >
+            복사
           </button>
-          <button className="ghost" disabled={state.running} onClick={() => copy('redline')}>
-            {copied === 'redline' ? '복사됨' : '대조본 복사'}
-          </button>
-          <button className="ghost" disabled={state.running} onClick={() => copy('list')}>
-            {copied === 'list' ? '복사됨' : '목록 복사'}
-          </button>
+          <span className={`copy-group ${copyOpen ? 'open' : ''}`}>
+            <button className="ghost" disabled={state.running} onClick={() => copy('result')}>
+              {copied === 'result' ? '복사됨' : '교정본 복사'}
+            </button>
+            <button className="ghost" disabled={state.running} onClick={() => copy('redline')}>
+              {copied === 'redline' ? '복사됨' : '대조본 복사'}
+            </button>
+            <button className="ghost" disabled={state.running} onClick={() => copy('list')}>
+              {copied === 'list' ? '복사됨' : '목록 복사'}
+            </button>
+          </span>
           <button
             className="primary"
             disabled={state.running}
             onClick={() => {
               setNotice(null);
+              setCopyOpen(false);
               dispatch({ type: 'reset' });
             }}
           >
