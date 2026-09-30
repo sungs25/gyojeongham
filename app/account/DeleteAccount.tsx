@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { setDraft } from '@/lib/draft-store';
+import { clearJob } from '@/lib/job-store';
 
 // 탈퇴 확인 체크 후 버튼을 누르면 서버에 탈퇴를 요청하고, 브라우저의 로그인도 지운다
 export function DeleteAccount() {
@@ -25,6 +27,9 @@ export function DeleteAccount() {
       await createClient()
         .auth.signOut()
         .catch(() => {});
+      // 이 탭에 남은 입력 글과 교정 결과 열쇠도 지운다
+      setDraft('');
+      clearJob();
       router.replace('/write');
     } finally {
       setBusy(false);
