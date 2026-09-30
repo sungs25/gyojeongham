@@ -299,7 +299,8 @@ export default function WritePage() {
       <main className="page">
         <AccountBar refreshKey={balanceVersion} />
         <div className="editor">
-          <Hamster scene="ready" line="이 교정햄에게 맡겨줘! 뭐든지 다 해줄게." />
+          {/* 안내 문구(로그인·씨앗 부족 등)가 있으면 햄스터가 대신 말한다 */}
+          <Hamster scene="ready" line={notice ?? '이 교정햄에게 맡겨줘! 뭐든지 다 해줄게.'} />
           <textarea
             className="input"
             value={draft}
@@ -310,7 +311,7 @@ export default function WritePage() {
         </div>
         <div className="bar">
           <span className="meta">
-            {draft.length.toLocaleString()}자{notice && ` · ${notice}`}
+              {draft.length.toLocaleString()}자
           </span>
           <button
             className="primary"
@@ -473,10 +474,11 @@ export default function WritePage() {
         </div>
       ) : (
         <Hamster
-          className="hamster-float"
+          // 안내 문구(씨앗 반환 등)는 사라지지 않게 말풍선에 계속 둔다
+          className={`hamster-float ${notice ? 'hamster-keep' : ''}`}
           scale={2}
           scene={errorCount > 0 ? 'ready' : 'done'}
-          line={errorCount > 0 ? '몇 문단은 끝내 못 고쳤어.' : '짜잔! 다 고쳤어.'}
+          line={notice ?? (errorCount > 0 ? '몇 문단은 끝내 못 고쳤어.' : '짜잔! 다 고쳤어.')}
         />
       )}
 
@@ -488,7 +490,6 @@ export default function WritePage() {
             ` · 실패 ${state.chunkStates.filter((s) => s === 'error').length}개`}
           {state.running ? ' · 교정 중...' : ''}
           {` · ${state.source.length.toLocaleString()}자`}
-          {notice && ` · ${notice}`}
           {DEV_METRICS && ` · ${cost}원 · 출력 ${u.output.toLocaleString()}`}
           {DEV_METRICS && u.thinking > 0 && ` (사고 ${u.thinking.toLocaleString()})`}
           {DEV_METRICS && ` · 캐시 쓰기 ${u.cacheWrites}/읽기 ${u.cacheReads}`}

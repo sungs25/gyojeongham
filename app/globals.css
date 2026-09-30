@@ -444,3 +444,14 @@ html[data-resuming] .page::before {
   color: var(--ink-soft);
   font-size: 0.95rem;
 }
+
+
+/* 안내 문구를 말하는 햄스터: 말풍선이 사라지지 않고, 좁은 화면에서도 줄을 바꿔 다 보인다 */
+.hamster-float.hamster-keep .hamster-line { animation: none; }
+.hamster-float .hamster-line { max-width: min(20rem, calc(100vw - 7rem)); }
+
+/* 계정 표시: 좁은 화면에서 "씨앗 12개"가 세로로 쪼개지지 않게 */
+.account > span { white-space: nowrap; }
+@media (max-width: 480px) {
+  .account { gap: 0.5rem; padding: 0.5rem 1rem; flex-wrap: wrap; }
+}
