@@ -1,11 +1,24 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { pixelFont } from './fonts';
 
 export const metadata: Metadata = {
-  title: '교정햄',
-  description: '글을 넣으면 고친 곳과 이유를 보여주는 한국어 교정 서비스',
+    title: '교정햄',
+    description: '글을 넣으면 고친 곳과 이유를 보여주는 한국어 교정 서비스',
+    // 카카오톡·SNS에 주소를 붙였을 때 뜨는 미리보기. 그림은 app/opengraph-image.png
+    openGraph: {
+      title: '교정햄 — 고친 곳마다, 이유까지.',
+      description: '맞춤법부터 군더더기·번역투·어색한 어순까지, 문단마다 고치고 왜 고쳤는지 적어 드립니다.',
+      siteName: '교정햄',
+      locale: 'ko_KR',
+      type: 'website',
+    },
 };
+
+   // 모바일 브라우저의 주소창 색을 바탕색(크림)에 맞춘다
+  export const viewport: Viewport = {
+    themeColor: '#fff8ec',
+  };
 
 // 새로 고친 /write가 결과를 되찾는 동안 입력 화면이 잠깐 비치지 않게,
 // 화면을 그리기 전에 "되찾는 중" 표시를 붙인다. 표시는 /write가 결과를 띄우거나 되찾기를 포기할 때 뗀다.

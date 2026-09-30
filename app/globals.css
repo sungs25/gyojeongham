@@ -300,7 +300,8 @@ button { font: inherit; cursor: pointer; }
 }
 
 /* 로그인 화면: 모눈 바탕 위의 카드 한 장 */
-.login-page { min-height: 100dvh; background-color: var(--paper); background-image: var(--grid-bg); background-size: 24px 24px; }
+.login-page,
+.status-page { min-height: 100dvh; background-color: var(--paper); background-image: var(--grid-bg); background-size: 24px 24px; }
 .login {
   max-width: 24rem;
   margin: 12vh auto 0;
@@ -409,6 +410,25 @@ button { font: inherit; cursor: pointer; }
 /* 버튼 생성기 CSS는 outline을 없애므로, 키보드로 옮겨 왔을 때 보이는 테두리를 따로 둔다 */
 .kakao-login:focus-visible,
 .gsi-material-button:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+
+   /* 없는 주소·오류 화면: 로그인 화면과 같은 카드 */
+  .status-card {
+    max-width: 26rem;
+    margin: 12vh auto 0;
+    padding: 1.75rem 1.5rem 1.5rem;
+    background: var(--sheet);
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+  .status-card .hamster { margin-bottom: 1rem; }
+  .status-card h1 { margin: 0 0 0.5rem; font-size: 1.5rem; font-weight: 850; letter-spacing: -0.5px; }
+  .status-card p { margin: 0 0 1.5rem; font-size: 0.95rem; line-height: 1.7; color: var(--ink-soft); }
+  .status-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .status-actions > * { display: inline-flex; align-items: center; text-decoration: none; }
+  @media (max-width: 480px) {
+    .status-card { margin: 2rem 1rem 0; }
+  }
 
 
 /* 씨앗 구매 (6단계) */
@@ -612,16 +632,33 @@ button { font: inherit; cursor: pointer; }
 /* 새로 고친 뒤 결과를 되찾는 동안: 입력 화면을 숨기고 안내만 띄운다 (layout.tsx가 표시를 붙인다) */
 html[data-resuming] .editor,
 html[data-resuming] .page > .bar { visibility: hidden; }
+/* 책상에 앉은 햄스터(그림)와 그 아래 말풍선(글) */
 html[data-resuming] .page::before {
+  content: '';
+  position: fixed;
+  left: 50%;
+  top: calc(50% - 110px);
+  width: 93px;
+  height: 147px;
+  transform: translateX(-50%);
+  background: url('/hamster/working-a.png') center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+html[data-resuming] .page::after {
   content: '교정 결과를 불러오는 중...';
   position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: var(--ink-soft);
-  font-size: 0.95rem;
+  left: 50%;
+  top: calc(50% + 55px);
+  transform: translateX(-50%);
+  padding: 0.6rem 0.9rem;
+  white-space: nowrap;
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 3px 3px 0 var(--ink);
 }
-
 
 /* 안내 문구를 말하는 햄스터: 말풍선이 사라지지 않고, 좁은 화면에서도 줄을 바꿔 다 보인다 */
 .hamster-float.hamster-keep .hamster-line { animation: none; }
@@ -882,3 +919,19 @@ html[data-resuming] .page::before {
   .lp-end-text h2 { font-size: 1.9rem; margin-bottom: 0.5rem; }
   .lp-end-text p { font-size: 0.95rem; }
 }
+
+
+
+  /* 마우스를 올렸을 때: 노란 버튼은 살짝 떠오르고, 테두리 버튼과 상품 칸은 연노랑으로 칠해진다.
+      손가락으로 누르는 기기에서는 누른 뒤에도 칠해진 채로 남으므로 마우스가 있는 기기에만 둔다 */
+  .primary, .ghost, .product { transition: transform 0.08s, box-shadow 0.08s, background-color 0.12s; }
+  @media (hover: hover) {
+    .primary:hover:not(:disabled):not(:active) { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+    .primary.lp-cta:hover:not(:active),
+    .primary.credits-pay:hover:not(:disabled):not(:active) { box-shadow: 5px 5px 0 var(--ink); }
+    .lp-end .primary.lp-cta:hover:not(:active) { box-shadow: 5px 5px 0 var(--sun-wash); }
+    .ghost:hover:not(:disabled) { background: var(--sun-wash); }
+    .account-delete:hover:not(:disabled) { background: var(--red-wash); }
+    .product:hover:not(:disabled):not(.on) { background: var(--sun-wash); }
+    .account-price:hover { color: var(--red); }
+  }
