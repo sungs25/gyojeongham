@@ -23,7 +23,14 @@ import { ChunkError, createJob, fetchJob, requestChunk } from '@/lib/proofread-c
 import { clearJob, loadJob, saveJob, type SavedJob } from '@/lib/job-store';
 import { SiteHeader } from '@/app/components/SiteHeader';
 import { HAMSTER_SRCS, Hamster } from '@/app/components/Hamster';
-import { getDraft, getServerDraft, setDraft, subscribeDraft } from '@/lib/draft-store';
+import {
+    getDraft,
+    getServerDraft,
+    setDraft,
+    subscribeDraft,
+    syncDraftOwner,
+  } from '@/lib/draft-store';
+import { createClient } from '@/lib/supabase/client';
 
 const CONCURRENCY = 10;
 // 청크당 최대 시도 횟수. 서버(finish_chunk)는 3회째 실패에서 씨앗을 반환하므로 반드시 3
@@ -53,6 +60,9 @@ export default function WritePage() {
   const [state, dispatch] = useReducer(reducer, initialState);
   // 입력 중인 글은 탭 안 저장소에 둔다 (로그인하러 갔다 와도 남도록)
   const draft = useSyncExternalStore(subscribeDraft, getDraft, getServerDraft);
+  // 글 주인(로그인한 계정)을 확인했는지. 확인 전에는 남은 글을 보여 주지 않는다 (다른 사람의 글이 잠깐 비치지 않게)
+  const [ownerChecked, setOwnerChecked] = useState(false);
+  const shownDraft = ownerChecked ? draft : '';
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [copied, setCopied] = useState<'result' | 'redline' | 'list' | null>(null);
@@ -254,18 +264,24 @@ export default function WritePage() {
     setBalanceVersion((v) => v + 1);
   }
 
-  // 새로 고침·다시 들어옴: 기억해 둔 작업이 있으면 되찾는다
-  const resumeSaved = useEffectEvent((saved: SavedJob) => {
-    void resume(saved);
-  });
-  useEffect(() => {
+  // 화면을 열 때: 글 주인이 바뀌었으면(로그아웃·로그인 만료·다른 계정) 이 탭의 글과 교정 결과 열쇠를 지운다.
+  // 그다음 기억해 둔 작업이 있으면 되찾는다
+  const openPage = useEffectEvent(async () => {
+  const { data, error } = await createClient().auth.getSession();
+  // 네트워크 문제로 로그인 상태를 못 읽었을 때는 지우지 않는다 (로그아웃으로 착각하지 않게)
+  if (!error && syncDraftOwner(data.session?.user.id ?? null)) clearJob();
+    setOwnerChecked(true);
+
     const saved = loadJob();
     if (!saved) {
       endResuming();
       return;
     }
+      await resume(saved);
+    });
+    useEffect(() => {
     // 화면을 한 번 그린 뒤에 시작한다. 개발 모드에서 두 번 불려도 앞의 예약은 취소돼 한 번만 돈다
-    const timer = setTimeout(() => resumeSaved(saved), 0);
+    const timer = setTimeout(() => void openPage(), 0);
     // 서버 응답이 너무 늦으면 일단 입력 화면을 보여 준다
     const fallback = setTimeout(endResuming, 10000);
     return () => {
@@ -303,7 +319,8 @@ export default function WritePage() {
           <Hamster scene="ready" line={notice ?? '이 교정햄에게 맡겨줘! 뭐든지 다 해줄게.'} />
           <textarea
             className="input"
-            value={draft}
+            value={shownDraft}
+            readOnly={!ownerChecked}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="교정할 글을 붙여 넣으세요."
             spellCheck={false}
@@ -311,11 +328,11 @@ export default function WritePage() {
         </div>
         <div className="bar">
           <span className="meta">
-              {draft.length.toLocaleString()}자
+              {shownDraft.length.toLocaleString()}자
           </span>
           <button
             className="primary"
-            disabled={draft.trim().length === 0 || starting}
+            disabled={shownDraft.trim().length === 0 || starting}
             onClick={run}
           >
             {starting ? '시작하는 중...' : '교정하기'}

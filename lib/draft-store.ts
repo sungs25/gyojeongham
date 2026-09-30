@@ -35,3 +35,28 @@ export function setDraft(text: string) {
   }
   listeners.forEach((listener) => listener());
 }
+
+
+// 입력 글을 쓴 계정. 로그인하기 전에 쓴 글이면 비어 있다
+const OWNER_KEY = 'gyojeongham:owner';
+
+// 지금 로그인한 계정(없으면 null)과 글 주인을 맞춘다.
+// 주인이 있었는데 지금 계정과 다르면(로그아웃·로그인 만료·다른 계정) 이 탭의 글을 지우고 true를 돌려준다.
+// 로그인하기 전에 쓴 글(주인 없음)은 로그인하면 그 계정의 글이 된다 (로그인하러 갔다 와도 남도록)
+export function syncDraftOwner(current: string | null): boolean {
+  let owner: string | null = null;
+  try {
+    owner = sessionStorage.getItem(OWNER_KEY);
+  } catch {
+    // sessionStorage를 못 쓰면 글도 메모리에만 있어서 새로 고치면 어차피 사라진다
+  }
+  const changed = owner !== null && owner !== current;
+  if (changed) setDraft('');
+  try {
+    if (current) sessionStorage.setItem(OWNER_KEY, current);
+    else sessionStorage.removeItem(OWNER_KEY);
+  } catch {
+    // 위와 같다
+  }
+  return changed;
+}
