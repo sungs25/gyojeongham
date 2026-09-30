@@ -337,10 +337,9 @@ button { font: inherit; cursor: pointer; }
 
 /* 구글 로그인 버튼: 구글 버튼 생성기 CSS 그대로 (가로만 칸에 맞게 늘림) */
 .gsi-material-button {
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  -webkit-appearance: none;
+  -webkit-user-select: none; /* Safari는 아직 접두사 이름이 필요하다 */
+  user-select: none;
+  appearance: none;
   background-color: WHITE;
   background-image: none;
   border: 1px solid #747775;
