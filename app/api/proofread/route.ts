@@ -141,7 +141,15 @@ export async function POST(request: Request) {
     ? { ok: false, error: '강제 실패 (개발용)', usage: null }
     : await callModel(text);
 
-  // 4. 결과와 usage를 기록한다. 전부 성공이면 commit, 3회째 실패면 release
+    // 4. 성공한 결과는 보관한다. 새로 고친 화면이 다시 받아 간다 (24시간 뒤 자동 삭제)
+  if (result.ok) {
+    const { error: saveError } = await admin
+      .from('chunk_results')
+      .upsert({ job_id: jobId, idx: started.idx, changes: result.changes });
+    if (saveError) console.error('chunk_results 저장 실패', saveError);
+  }
+
+  // 5. 결과와 usage를 기록한다. 전부 성공이면 commit, 3회째 실패면 release
   const { data: jobStatus, error: finishError } = await admin.rpc('finish_chunk', {
     p_user: userId,
     p_job: jobId,
