@@ -160,7 +160,7 @@ export default function Home() {
               <h2 className="lp-h2">맡긴 글은</h2>
             </div>
             <div className="lp-trust-body">
-              <p>교정은 AI(Anthropic의 Claude)가 합니다.</p>
+              <p>교정은 생성형 AI가 합니다.</p>
               <p>
                 글 전체는 서버에 저장하지 않습니다. 새로 고쳐도 결과를 다시 볼 수 있게{' '}
                 <b>고친 부분(고치기 전·후 구절과 이유)만 24시간</b> 보관하고 자동으로 지웁니다.

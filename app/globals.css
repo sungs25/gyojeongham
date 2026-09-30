@@ -8,9 +8,12 @@
   --sun: #f6b93b;        /* 해바라기 노랑: 버튼·띠 */
   --sun-wash: #fdebc2;
   --red: #c23b25;        /* 빨간 펜 */
-  --seed: #a8791b;
-  --seed-wash: #f7eed6;
-  --removed: #f0e6e4;
+  --red-wash: #f8e0d9;   /* 지운 말 바탕 */
+  --margin-line: #f0b4a6; /* 원고지 왼쪽 여백 선 */
+  /* 모눈 바탕: 원고지이자 도트 칸 */
+  --grid-bg:
+    linear-gradient(rgba(235, 221, 198, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(235, 221, 198, 0.5) 1px, transparent 1px);
 
   --font-body: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --reading: 1.05rem;
@@ -34,37 +37,49 @@ button { font: inherit; cursor: pointer; }
 
 .page { min-height: 100dvh; padding-bottom: var(--bar-h); }
 
+/* 입력 화면: 모눈 바탕 위에 원고지 */
+.page:has(> .editor) { background-color: var(--paper); background-image: var(--grid-bg); background-size: 24px 24px; }
 .editor { max-width: 46rem; margin: 0 auto; padding: var(--gap); }
 
+/* 입력칸 = 원고지: 글줄마다 밑줄, 왼쪽에 빨간 여백 선. 줄은 글과 함께 스크롤된다 */
 .input {
   width: 100%;
   min-height: 60vh;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: #fff;
-  padding: 1.25rem;
+  padding: 1rem 1.25rem 1rem 3.25rem;
   font: inherit;
   font-size: var(--reading);
-  line-height: var(--leading);
+  line-height: 2rem;
   resize: vertical;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 6px 6px 0 var(--ink);
+  background-color: var(--sheet);
+  background-image:
+    linear-gradient(90deg, transparent 2.25rem, var(--margin-line) 2.25rem, var(--margin-line) calc(2.25rem + 2px), transparent calc(2.25rem + 2px)),
+    repeating-linear-gradient(to bottom, transparent 0 calc(2rem - 1px), var(--line) calc(2rem - 1px) 2rem);
+  background-origin: border-box, content-box;
+  background-attachment: local, local;
 }
+.input::placeholder { color: #a8998a; }
+.input:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
 
-.input:focus-visible { outline: 2px solid var(--seed); outline-offset: 1px; }
-
+/* 결과 화면: 원문과 교정본을 굵은 선으로 나눈다 */
 .split {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--line);
-  border-bottom: 1px solid var(--line);
+  gap: 2px;
+  background: var(--ink);
+  border-bottom: 2px solid var(--ink);
 }
 
-.pane { background: var(--paper); padding: var(--gap); min-width: 0; }
+.pane { background: var(--sheet); padding: var(--gap); min-width: 0; }
 
 .pane-title {
   margin: 0 0 0.75rem;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-family: var(--font-pixel);
+  font-size: 13px;
+  font-weight: 400;
   color: var(--ink-soft);
 }
 
@@ -78,15 +93,17 @@ button { font: inherit; cursor: pointer; }
 
 .mark { all: unset; cursor: pointer; border-radius: 2px; padding: 0 1px; }
 
+/* 지운 말: 빨간 펜 줄, 고친 말: 형광펜 */
 .mark.before {
-  background: var(--removed);
+  background: var(--red-wash);
   text-decoration: line-through;
-  text-decoration-color: var(--ink-soft);
+  text-decoration-color: var(--red);
+  text-decoration-thickness: 1.5px;
 }
 
-.mark.after { background: var(--seed-wash); box-shadow: inset 0 -2px 0 var(--seed); }
+.mark.after { background: var(--sun-wash); box-shadow: inset 0 -2px 0 var(--sun); }
 
-.mark.focus { outline: 2px solid var(--seed); outline-offset: 1px; }
+.mark.focus { outline: 2px solid var(--ink); outline-offset: 1px; }
 
 
 .bar {
@@ -98,8 +115,8 @@ button { font: inherit; cursor: pointer; }
   justify-content: space-between;
   gap: 1rem;
   padding: 0 var(--gap);
-  background: var(--paper);
-  border-top: 1px solid var(--line);
+  background: var(--sheet);
+  border-top: 2px solid var(--ink);
 }
 
 .bar-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
@@ -135,6 +152,7 @@ button { font: inherit; cursor: pointer; }
 
 .primary:disabled, .ghost:disabled { opacity: 0.4; cursor: default; }
 
+/* 변경 목록 패널 */
 .panel {
   position: fixed;
   top: 0;
@@ -143,8 +161,8 @@ button { font: inherit; cursor: pointer; }
   width: min(24rem, 100vw);
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-left: 1px solid var(--line);
+  background: var(--sheet);
+  border-left: 2px solid var(--ink);
   transform: translateX(100%);
   transition: transform 0.2s ease;
 }
@@ -156,19 +174,21 @@ button { font: inherit; cursor: pointer; }
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--line);
-  font-size: 0.9rem;
-  font-weight: 600;
+  border-bottom: 2px solid var(--ink);
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .panel-list { overflow-y: auto; flex: 1; }
 
+/* 고른 변경: 왼쪽 노란 띠 */
 .panel-selected {
   max-height: 40%;
   overflow-y: auto;
   padding: 0.9rem 1rem;
-  border-bottom: 1px solid var(--line);
-  box-shadow: inset 3px 0 0 var(--seed);
+  background: #fff;
+  border-bottom: 2px solid var(--ink);
+  box-shadow: inset 4px 0 0 var(--sun);
 }
 
 .axis { border-bottom: 1px solid var(--line); }
@@ -178,15 +198,14 @@ button { font: inherit; cursor: pointer; }
   gap: 0.5rem;
   padding: 0.7rem 1rem;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   list-style: none;
 }
 .axis-head::-webkit-details-marker { display: none; }
-.axis-head::before { content: '▸'; color: var(--ink-soft); }
+.axis-head::before { content: '▸'; color: var(--red); }
 .axis[open] > .axis-head::before { content: '▾'; }
 .axis-count { margin-left: auto; font-weight: 400; color: var(--ink-soft); }
-.axis-head .ghost { font-weight: 400; }
 .axis-items { list-style: none; margin: 0; padding: 0; }
 
 .panel-item {
@@ -205,15 +224,28 @@ button { font: inherit; cursor: pointer; }
   line-height: 1.6;
   word-break: break-word;
 }
-.panel-pick:focus-visible { outline: 2px solid var(--seed); }
+.panel-pick:focus-visible { outline: 2px solid var(--ink); }
 .ghost.small { padding: 0.25rem 0.5rem; font-size: 0.8rem; white-space: nowrap; }
+/* 목록 안의 작은 버튼은 줄마다 반복되므로 테두리를 가볍게 */
+.panel .ghost.small { border-width: 1.5px; font-weight: 500; }
 .panel-item.off { opacity: 0.55; }
-.panel-item.focus { background: var(--seed-wash); }
+.panel-item.focus { background: var(--sun-wash); }
 
-.panel-rules { margin: 0 0 0.35rem; font-size: 0.8rem; font-weight: 600; color: var(--seed); }
+/* 규칙 이름: 첫 화면 원고지의 이름표와 같은 모양 */
+.panel-rules {
+  display: inline-block;
+  margin: 0 0 0.5rem;
+  padding: 2px 6px;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  line-height: 1.4;
+  background: var(--sun-wash);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+}
 .panel-diff { margin: 0 0 0.35rem; font-size: 0.9rem; line-height: 1.6; }
-.panel del { background: var(--removed); text-decoration-color: var(--ink-soft); }
-.panel ins { background: var(--seed-wash); text-decoration: none; }
+.panel del { background: var(--red-wash); text-decoration-color: var(--red); }
+.panel ins { background: var(--sun-wash); text-decoration: none; }
 .panel-note { margin: 0 0 0.6rem; font-size: 0.85rem; line-height: 1.6; color: var(--ink-soft); }
 
 @media (min-width: 901px) {
@@ -267,23 +299,34 @@ button { font: inherit; cursor: pointer; }
   .site-header.signed-in .brand-name { display: none; }
 }
 
-/* 로그인 화면 (4단계) */
+/* 로그인 화면: 모눈 바탕 위의 카드 한 장 */
+.login-page { min-height: 100dvh; background-color: var(--paper); background-image: var(--grid-bg); background-size: 24px 24px; }
 .login {
-  max-width: 22rem;
-  margin: 18vh auto 0;
-  padding: var(--gap);
+  max-width: 24rem;
+  margin: 12vh auto 0;
+  padding: 1.75rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  background: var(--sheet);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 6px 6px 0 var(--ink);
 }
-.login h1 { margin: 0 0 0.5rem; font-size: 1.4rem; }
-.login-error { margin: 0; font-size: 0.85rem; color: #b3261e; }
+.login .hamster { margin-bottom: 0.5rem; }
+.login h1 { margin: 0 0 0.25rem; font-size: 1.5rem; font-weight: 850; letter-spacing: -0.5px; }
+.login .ghost { padding: 0.75rem; font-size: 1rem; }
+.login-error { margin: 0; font-size: 0.85rem; color: var(--red); }
+@media (max-width: 480px) {
+  .login { margin: 2rem 1rem 0; }
+}
 
 
 /* 씨앗 구매 (6단계) */
-.credits { max-width: 36rem; margin: 0 auto; padding: var(--gap); }
-.credits h1 { margin: 1.25rem 0 1rem; font-size: 1.4rem; }
+.credits { max-width: 36rem; margin: 0 auto; padding: var(--gap) var(--gap) 3rem; }
+.credits h1 { margin: 1.25rem 0 1rem; font-size: 1.9rem; font-weight: 850; letter-spacing: -0.5px; }
 .credits-back { font-size: 0.85rem; color: var(--ink-soft); text-decoration: none; }
+.credits-back:hover { color: var(--red); }
 .credits-note { margin: 0 0 var(--gap); font-size: 0.9rem; line-height: 1.7; color: var(--ink-soft); }
 .credits-note strong { color: var(--ink); }
 .products {
@@ -292,36 +335,39 @@ button { font: inherit; cursor: pointer; }
   padding: 0;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
+/* 상품: 고르면 노랗게 칠해진다 */
 .product {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.15rem;
-  padding: 0.75rem 0.9rem;
-  background: transparent;
+  padding: 0.8rem 1rem;
+  background: var(--sheet);
   color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 var(--ink);
   text-align: left;
 }
-.product.on { border-color: var(--seed); background: var(--seed-wash); }
+.product.on { background: var(--sun); }
+.product.on .product-sub { color: var(--ink); }
 .product:disabled { opacity: 0.4; cursor: default; }
-.product-name { font-weight: 600; }
+.product-name { font-family: var(--font-pixel); font-size: 16px; font-weight: 700; }
 .product-sub { font-size: 0.8rem; color: var(--ink-soft); }
-.product-price { margin-top: 0.25rem; font-weight: 600; }
-.credits-pay { width: 100%; margin-top: var(--gap); padding: 0.75rem; }
+.product-price { margin-top: 0.25rem; font-size: 1.2rem; font-weight: 850; }
+.credits-pay { width: 100%; margin-top: var(--gap); padding: 0.85rem; font-size: 1.05rem; border-radius: 10px; box-shadow: 4px 4px 0 var(--ink); }
 
-.credits-error { margin: var(--gap) 0 0; font-size: 0.85rem; color: #b3261e; }
+.credits-error { margin: var(--gap) 0 0; font-size: 0.85rem; color: var(--red); }
 
 
 /* 내 계정 (6단계) */
 .account-danger-title { margin: calc(var(--gap) * 2) 0 0.5rem; font-size: 1.05rem; }
 .account-danger-list { padding-left: 1.2rem; }
 .account-confirm { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
-.account-delete { margin-top: var(--gap); color: #b3261e; border-color: #e6b8b4; }
+.account-delete { margin-top: var(--gap); color: var(--red); border-color: var(--red); box-shadow: none; }
 
 
 /* 햄스터 도트 그림: 확대해도 칸이 번지지 않게 */
@@ -374,7 +420,7 @@ button { font: inherit; cursor: pointer; }
 .hamster-rev .hamster-line::before { left: auto; right: -11px; }
 .hamster-rev .hamster-line::after { left: auto; right: -18px; }
 
-.editor .hamster { margin-bottom: 1rem; }
+.editor .hamster { margin: 0 0 1.25rem 0.5rem; }
 
 @media (prefers-reduced-motion: reduce) {
   .hamster-frame2 { animation: none; opacity: 0; }
@@ -426,17 +472,19 @@ button { font: inherit; cursor: pointer; }
   align-items: center;
   justify-content: center;
   padding: var(--gap);
-  background: rgba(252, 252, 250, 0.85); /* --paper를 반투명하게 */
+  background: rgba(255, 248, 236, 0.88); /* --paper를 반투명하게 */
 }
 .panel-open .hamster-stage { display: none; }
 
 
-/* 씨앗 햄스터: 연한 씨앗색 카드에 담아 위아래 글과 왼쪽 선을 맞춘다 */
+/* 씨앗 햄스터: 노란 카드에 담아 위아래 글과 왼쪽 선을 맞춘다 */
 .credits .hamster {
   margin: 0 0 1.5rem;
   padding: 1rem 1.25rem;
-  background: var(--seed-wash);
-  border-radius: 12px;
+  background: var(--sun-wash);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 4px 4px 0 var(--ink);
 }
 
 
@@ -463,10 +511,10 @@ button { font: inherit; cursor: pointer; }
     bottom: calc(100% + 0.5rem);
     flex-direction: column;
     padding: 0.5rem;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    background: var(--sheet);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    box-shadow: 4px 4px 0 var(--ink);
   }
   .copy-group.open { display: flex; }
 }
@@ -498,9 +546,7 @@ html[data-resuming] .page::before {
 .lp-hero,
 .lp-step-stage {
   background-color: var(--paper);
-  background-image:
-    linear-gradient(rgba(235, 221, 198, 0.5) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(235, 221, 198, 0.5) 1px, transparent 1px);
+  background-image: var(--grid-bg);
   background-size: 24px 24px;
 }
 .lp-kicker { margin: 0 0 1rem; font-family: var(--font-pixel); font-size: 13px; color: var(--red); }
@@ -561,7 +607,7 @@ html[data-resuming] .page::before {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: #f0b4a6;
+  background: var(--margin-line);
 }
 .lp-sheet-label { margin: 0; font-family: var(--font-pixel); font-size: 11px; line-height: 20px; color: var(--ink-soft); }
 .lp-sheet-text { margin: 14px 0 0; font-size: 20px; line-height: 60px; white-space: nowrap; }
@@ -697,14 +743,15 @@ html[data-resuming] .page::before {
   .lp-lead { font-size: 1rem; margin-bottom: 1.75rem; }
   .lp-cta-row { flex-direction: column; gap: 0.75rem; }
 
-  /* 원고지는 위, 햄스터는 오른쪽 아래에서 왼쪽으로 말한다 */
-  .lp-stage { height: 470px; }
-  .lp-sheet { left: 0; right: auto; width: min(344px, 100%); padding: 22px 14px 20px 38px; }
+  /* 원고지 아래에 햄스터가 선다. 높이를 정해 두지 않고 차례로 쌓아,
+     원고지 글이 몇 줄로 접히든 햄스터·말풍선과 겹치지 않는다 */
+  .lp-stage { height: auto; display: flex; flex-direction: column; gap: 2.25rem; }
+  .lp-sheet { position: relative; top: auto; right: auto; width: calc(100% - 12px); max-width: 360px; padding: 22px 14px 20px 38px; }
   .lp-sheet::before { left: 26px; }
   .lp-sheet-text { font-size: 16px; }
   .lp-fix ins { font-size: 24px; }
   .lp-note { font-size: 19px; }
-  .lp-stage .hamster { left: auto; right: 4px; flex-direction: row-reverse; }
+  .lp-stage .hamster { position: static; align-self: flex-end; margin-right: 4px; flex-direction: row-reverse; }
   .lp-stage .hamster-sprite { --scale: 3; }
   .lp-stage .hamster-line { margin-bottom: 60px; font-size: 13px; }
   .lp-stage .hamster-line::before { left: auto; right: -11px; }
