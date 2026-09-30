@@ -14,6 +14,9 @@ const FRAMES: Record<HamsterScene, string[]> = {
   seed: ['/hamster/seed.png'],
 };
 
+// 미리 받아 둘 그림 전체 (preload용)
+export const HAMSTER_SRCS = Object.values(FRAMES).flat();
+
 export function Hamster({
   scene,
   line,

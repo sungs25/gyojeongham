@@ -1,17 +1,28 @@
 'use client';
 
-import { useMemo, useReducer, useState, useSyncExternalStore } from 'react';
+import {
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useState,
+  useSyncExternalStore,
+} from 'react';
+import { preload } from 'react-dom';
 import { cleanSource, splitIntoChunks } from '@/lib/chunk';
 import { applyChanges, buildSegments } from '@/lib/derive';
 import { runQueue } from '@/lib/queue';
 import { costKrw, summarize } from '@/lib/cost';
-import { initialState, reducer } from './reducer';
+import { initialState, reducer, type Usage } from './reducer';
+import type { Chunk } from './types';
 import { ruleName } from '@/lib/rules';
 import { groupByAxis } from '@/lib/axes';
 import { buildChangeList, buildRedline } from '@/lib/copy';
-import { ChunkError, createJob, requestChunk } from '@/lib/proofread-client';
+import { ChunkError, createJob, fetchJob, requestChunk } from '@/lib/proofread-client';
+import { clearJob, loadJob, saveJob, type SavedJob } from '@/lib/job-store';
 import { AccountBar } from './AccountBar';
-import { Hamster } from '@/app/components/Hamster';
+import { HAMSTER_SRCS, Hamster } from '@/app/components/Hamster';
 import { getDraft, getServerDraft, setDraft, subscribeDraft } from '@/lib/draft-store';
 
 const CONCURRENCY = 10;
@@ -21,7 +32,24 @@ const RETRY_LIMIT = 3;
 // 개발 중에만 원가·토큰을 하단 바에 띄운다. 배포 빌드에서는 꺼진다.
 const DEV_METRICS = process.env.NODE_ENV === 'development';
 
+// 되찾는 중 표시(layout.tsx가 붙인다)를 뗀다. 입력 화면이나 결과 화면이 다시 보인다
+function endResuming() {
+  delete document.documentElement.dataset.resuming;
+}
+
+// 서버에서 되찾은 문단은 이 화면에서 토큰을 쓰지 않았다
+const EMPTY_USAGE: Usage = {
+  inputTokens: 0,
+  cacheCreationTokens: 0,
+  cacheReadTokens: 0,
+  outputTokens: 0,
+  thinkingTokens: 0,
+};
+
 export default function WritePage() {
+  // 햄스터 그림을 화면을 열 때 미리 받아 둔다. 교정이 시작되면 오래 걸리는 요청 10개가
+  // 브라우저의 동시 연결을 다 차지해서, 그때 그림을 요청하면 요청이 끝날 때까지 안 뜬다
+  for (const src of HAMSTER_SRCS) preload(src, { as: 'image' });
   const [state, dispatch] = useReducer(reducer, initialState);
   // 입력 중인 글은 탭 안 저장소에 둔다 (로그인하러 갔다 와도 남도록)
   const draft = useSyncExternalStore(subscribeDraft, getDraft, getServerDraft);
@@ -86,6 +114,46 @@ export default function WritePage() {
 
   const axes = useMemo(() => groupByAxis(state.changes), [state.changes]);
 
+  // 문단들을 서버로 보낸다. 성공한 문단 번호와, 멈춰야 할 때의 안내 문구를 돌려준다
+  // (작업이 반환됐거나 로그인이 풀리면 남은 문단은 보내지 않는다)
+  async function sendChunks(
+    jobId: string,
+    chunks: Chunk[],
+  ): Promise<{ done: Set<number>; stopMessage: string | null }> {
+    const done = new Set<number>();
+    let stopMessage: string | null = null;
+
+    await runQueue(chunks, CONCURRENCY, async (chunk) => {
+      if (stopMessage) {
+        dispatch({ type: 'chunk-error', index: chunk.index });
+        return;
+      }
+      dispatch({ type: 'chunk-running', index: chunk.index });
+
+      for (let attempt = 1; attempt <= RETRY_LIMIT; attempt += 1) {
+        try {
+          const { raws, usage } = await requestChunk(jobId, chunk.text);
+          dispatch({ type: 'chunk-done', index: chunk.index, raws, usage });
+          done.add(chunk.index);
+          return;
+        } catch (error) {
+          console.warn(`청크 ${chunk.index} 시도 ${attempt} 실패`, error);
+          // 네트워크 오류처럼 서버 응답이 없는 실패는 다시 보낸다
+          const retryable = !(error instanceof ChunkError) || error.retryable;
+          if (error instanceof ChunkError && error.stopMessage) {
+            stopMessage = error.stopMessage;
+          }
+          if (!retryable || stopMessage || attempt === RETRY_LIMIT) {
+            dispatch({ type: 'chunk-error', index: chunk.index });
+            return;
+          }
+        }
+      }
+    });
+
+    return { done, stopMessage };
+  }
+
   async function run() {
     if (state.running || starting) return;
 
@@ -104,44 +172,120 @@ export default function WritePage() {
     }
 
     dispatch({ type: 'start', source, chunks });
+    // 새로 고쳐도 이 작업을 되찾을 수 있게 탭 안에 기억해 둔다
+    saveJob({ jobId: job.jobId, source });
     // 씨앗이 잡혔으니 잔액을 다시 읽는다
     setBalanceVersion((v) => v + 1);
 
-    // 작업이 반환됐거나 로그인이 풀리면 남은 청크를 보내지 않는다
-    let stopMessage: string | null = null;
-
-    await runQueue(chunks, CONCURRENCY, async (chunk) => {
-      if (stopMessage) {
-        dispatch({ type: 'chunk-error', index: chunk.index });
-        return;
-      }
-      dispatch({ type: 'chunk-running', index: chunk.index });
-
-      for (let attempt = 1; attempt <= RETRY_LIMIT; attempt += 1) {
-        try {
-          const { raws, usage } = await requestChunk(job.jobId, chunk.text);
-          dispatch({ type: 'chunk-done', index: chunk.index, raws, usage });
-          return;
-        } catch (error) {
-          console.warn(`청크 ${chunk.index} 시도 ${attempt} 실패`, error);
-          // 네트워크 오류처럼 서버 응답이 없는 실패는 다시 보낸다
-          const retryable = !(error instanceof ChunkError) || error.retryable;
-          if (error instanceof ChunkError && error.stopMessage) {
-            stopMessage = error.stopMessage;
-          }
-          if (!retryable || stopMessage || attempt === RETRY_LIMIT) {
-            dispatch({ type: 'chunk-error', index: chunk.index });
-            return;
-          }
-        }
-      }
-    });
+    const { stopMessage } = await sendChunks(job.jobId, chunks);
 
     dispatch({ type: 'finish' });
     if (stopMessage) setNotice(stopMessage);
     // 실패로 반환됐을 수 있으니 한 번 더 읽는다
     setBalanceVersion((v) => v + 1);
   }
+
+  // 새로 고친 뒤: 기억해 둔 작업의 결과를 서버에서 다시 받아 오고, 안 보낸 문단은 이어서 보낸다
+  async function resume(saved: SavedJob) {
+    const first = await fetchJob(saved.jobId);
+    if (!first.ok) {
+      endResuming();
+      if (first.reason === 'gone') {
+        clearJob();
+      } else if (first.reason === 'login') {
+        setNotice('로그인이 풀렸습니다. 다시 로그인하면 교정 결과를 다시 불러옵니다.');
+      } else {
+        setNotice('교정 결과를 다시 불러오지 못했습니다. 잠시 뒤 새로 고쳐 주세요.');
+      }
+      return;
+    }
+
+    const job = first.job;
+    const chunks = splitIntoChunks(saved.source);
+    if (chunks.length !== job.chunks.length) {
+      endResuming();
+      clearJob();
+      return;
+    }
+    // 끝난 문단의 결과가 다 남아 있지 않으면 보관 기간(24시간)이 지난 것
+    const doneOnServer = job.chunks.filter((c) => c.status === 'done').length;
+    if (job.results.length < doneOnServer) {
+      endResuming();
+      clearJob();
+      setNotice('보관 기간(24시간)이 지나 교정 결과를 다시 불러올 수 없습니다.');
+      return;
+    }
+
+    dispatch({ type: 'start', source: saved.source, chunks });
+    const restored = new Set<number>();
+    const restore = (results: typeof job.results) => {
+      for (const r of results) {
+        if (restored.has(r.idx) || !chunks[r.idx]) continue;
+        restored.add(r.idx);
+        dispatch({ type: 'chunk-done', index: r.idx, raws: r.changes, usage: EMPTY_USAGE });
+      }
+    };
+    restore(job.results);
+    for (const c of job.chunks) {
+      if (c.status === 'failed') dispatch({ type: 'chunk-error', index: c.idx });
+    }
+
+    let stopMessage: string | null = null;
+    if (job.status === 'held') {
+      // 아직 안 끝난 문단만 다시 보낸다
+      const rest = chunks.filter(
+        (c) => !restored.has(c.index) && job.chunks[c.index]?.status === 'pending',
+      );
+      const sent = await sendChunks(saved.jobId, rest);
+      stopMessage = sent.stopMessage;
+      sent.done.forEach((idx) => restored.add(idx));
+      // 새로 고치기 전에 보낸 문단이 그사이 서버에서 끝났을 수 있으니, 남은 결과로 한 번 더 채운다
+      const again = await fetchJob(saved.jobId);
+      if (again.ok) restore(again.job.results);
+    } else if (job.status === 'released') {
+      stopMessage = '교정을 끝내지 못해 씨앗을 모두 돌려드렸습니다.';
+    } else if (job.chunks.some((c) => c.status === 'failed')) {
+      // 오래 멈춰 정산된 작업: 끝난 문단 분량만큼만 씨앗을 쓰고 나머지는 돌려줬다
+      stopMessage = '오래 멈춰 있던 문단은 교정하지 못했습니다. 교정한 분량만큼만 씨앗을 썼습니다.';
+    }
+
+    dispatch({ type: 'finish' });
+    if (stopMessage) setNotice(stopMessage);
+    setBalanceVersion((v) => v + 1);
+  }
+
+  // 새로 고침·다시 들어옴: 기억해 둔 작업이 있으면 되찾는다
+  const resumeSaved = useEffectEvent((saved: SavedJob) => {
+    void resume(saved);
+  });
+  useEffect(() => {
+    const saved = loadJob();
+    if (!saved) {
+      endResuming();
+      return;
+    }
+    // 화면을 한 번 그린 뒤에 시작한다. 개발 모드에서 두 번 불려도 앞의 예약은 취소돼 한 번만 돈다
+    const timer = setTimeout(() => resumeSaved(saved), 0);
+    // 서버 응답이 너무 늦으면 일단 입력 화면을 보여 준다
+    const fallback = setTimeout(endResuming, 10000);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(fallback);
+    };
+  }, []);
+
+  // 결과 화면이 그려지면, 화면에 보이기 전에 되찾는 중 표시를 뗀다
+  useLayoutEffect(() => {
+    if (state.chunks.length > 0) endResuming();
+  }, [state.chunks.length]);
+
+  // 교정 중에 창을 닫거나 새로 고치려 하면 브라우저가 한 번 묻게 한다
+  useEffect(() => {
+    if (!state.running) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [state.running]);
 
   const doneCount = state.chunkStates.filter((s) => s === 'done' || s === 'error').length;
   const errorCount = state.chunkStates.filter((s) => s === 'error').length;
@@ -378,6 +522,7 @@ export default function WritePage() {
             onClick={() => {
               setNotice(null);
               setCopyOpen(false);
+              clearJob();
               dispatch({ type: 'reset' });
             }}
           >

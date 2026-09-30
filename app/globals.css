@@ -430,3 +430,17 @@ button { font: inherit; cursor: pointer; }
   }
   .copy-group.open { display: flex; }
 }
+
+
+/* 새로 고친 뒤 결과를 되찾는 동안: 입력 화면을 숨기고 안내만 띄운다 (layout.tsx가 표시를 붙인다) */
+html[data-resuming] .editor,
+html[data-resuming] .page > .bar { visibility: hidden; }
+html[data-resuming] .page::before {
+  content: '교정 결과를 불러오는 중...';
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}

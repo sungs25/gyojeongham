@@ -89,3 +89,28 @@ export async function requestChunk(
     },
   };
 }
+
+// 서버에 남아 있는 작업 상태와 결과 (GET /api/jobs/[id])
+export type JobSnapshot = {
+  status: 'held' | 'committed' | 'released';
+  chunks: { idx: number; status: 'pending' | 'done' | 'failed' }[];
+  results: { idx: number; changes: RawChange[] }[];
+};
+
+// 새로 고친 뒤 작업 상태와 보관된 결과를 다시 받아 온다
+export async function fetchJob(
+  jobId: string,
+): Promise<{ ok: true; job: JobSnapshot } | { ok: false; reason: 'login' | 'gone' | 'error' }> {
+  try {
+    const response = await fetch(`/api/jobs/${encodeURIComponent(jobId)}`, { cache: 'no-store' });
+    if (response.status === 401) return { ok: false, reason: 'login' };
+    if (response.status === 404) return { ok: false, reason: 'gone' };
+    const data = await response.json().catch(() => null);
+    if (!response.ok || !Array.isArray(data?.chunks) || !Array.isArray(data?.results)) {
+      return { ok: false, reason: 'error' };
+    }
+    return { ok: true, job: data as JobSnapshot };
+  } catch {
+    return { ok: false, reason: 'error' };
+  }
+}
