@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { SiteHeader } from '@/app/components/SiteHeader';
 import { DeleteAccount } from './DeleteAccount';
+import { LogoutButton } from './LogoutButton';
 
 const PROVIDER_NAMES: Record<string, string> = { kakao: '카카오', google: '구글' };
 
@@ -19,7 +21,9 @@ export default async function AccountPage() {
   const provider = PROVIDER_NAMES[claims.app_metadata?.provider ?? ''] ?? '소셜';
 
   return (
-    <main className="credits">
+      <>
+      <SiteHeader />
+      <main className="credits">
       <a className="credits-back" href="/write">
         ← 교정 화면으로
       </a>
@@ -28,7 +32,7 @@ export default async function AccountPage() {
         <strong>{provider} 계정</strong>으로 로그인되어 있습니다. 남은 씨앗은{' '}
         <strong>{balance}개</strong>입니다.
       </p>
-
+      <LogoutButton />
       <h2 className="account-danger-title">회원 탈퇴</h2>
       <ul className="credits-note account-danger-list">
         <li>탈퇴하면 남은 씨앗은 모두 사라지고 되돌릴 수 없습니다.</li>
@@ -38,5 +42,6 @@ export default async function AccountPage() {
       </ul>
       <DeleteAccount />
     </main>
+    </>
   );
 }

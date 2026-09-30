@@ -21,7 +21,7 @@ import { groupByAxis } from '@/lib/axes';
 import { buildChangeList, buildRedline } from '@/lib/copy';
 import { ChunkError, createJob, fetchJob, requestChunk } from '@/lib/proofread-client';
 import { clearJob, loadJob, saveJob, type SavedJob } from '@/lib/job-store';
-import { AccountBar } from './AccountBar';
+import { SiteHeader } from '@/app/components/SiteHeader';
 import { HAMSTER_SRCS, Hamster } from '@/app/components/Hamster';
 import { getDraft, getServerDraft, setDraft, subscribeDraft } from '@/lib/draft-store';
 
@@ -297,7 +297,7 @@ export default function WritePage() {
     if (state.chunks.length === 0) {
     return (
       <main className="page">
-        <AccountBar refreshKey={balanceVersion} />
+        <SiteHeader refreshKey={balanceVersion} />
         <div className="editor">
           {/* 안내 문구(로그인·씨앗 부족 등)가 있으면 햄스터가 대신 말한다 */}
           <Hamster scene="ready" line={notice ?? '이 교정햄에게 맡겨줘! 뭐든지 다 해줄게.'} />
@@ -335,7 +335,7 @@ export default function WritePage() {
         setCopyOpen(false);
       }}
     >
-      <AccountBar refreshKey={balanceVersion} />
+      <SiteHeader refreshKey={balanceVersion} />
       <div className="split">
         <section className="pane">
           <h2 className="pane-title">원문</h2>

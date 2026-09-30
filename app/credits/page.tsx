@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { PaymentWidget } from './PaymentWidget';
 import { Hamster } from '@/app/components/Hamster';
+import { SiteHeader } from '@/app/components/SiteHeader';
 
 const PROVIDER_NAMES: Record<string, string> = { kakao: '카카오', google: '구글' };
 
@@ -17,7 +18,9 @@ export default async function CreditsPage() {
   const provider = PROVIDER_NAMES[claims.app_metadata?.provider ?? ''] ?? '지금';
 
   return (
-    <main className="credits">
+      <>
+      <SiteHeader />
+      <main className="credits">
       <a className="credits-back" href="/write">
         ← 교정 화면으로
       </a>
@@ -29,5 +32,6 @@ export default async function CreditsPage() {
       </p>
       <PaymentWidget customerKey={claims.sub} />
     </main>
+    </>
   );
 }

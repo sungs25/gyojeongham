@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import Image from 'next/image';
 
 // 햄스터 도트 그림은 모두 31×49칸이다. scale배로 키워서 보여준다.
@@ -33,8 +34,12 @@ export function Hamster({
   const height = H * scale;
 
   return (
-    <figure className={`hamster hamster-${scene} ${className}`}>
-      <span className="hamster-sprite" style={{ width, height }}>
+    // 그림 크기는 CSS가 --scale(배율)로 정한다. 좁은 화면에서는 CSS가 .hamster-sprite의 --scale만 바꿔 줄인다
+    <figure
+      className={`hamster hamster-${scene} ${className}`}
+      style={{ '--scale': scale } as CSSProperties}
+    >
+      <span className="hamster-sprite">
         {/* 작은 원본 그대로 보내고 CSS로 키운다 (최적화를 거치면 칸이 번진다) */}
         <Image src={first} alt="" width={width} height={height} unoptimized />
         {second && (

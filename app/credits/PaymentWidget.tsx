@@ -117,8 +117,9 @@ export function PaymentWidget({ customerKey }: { customerKey: string }) {
               onClick={() => choose(p)}
             >
               <span className="product-name">{p.name}</span>
+              <span className="product-sub">씨앗 {p.seeds}개</span>
               <span className="product-sub">
-                씨앗 {p.seeds}개 · 개당 {Math.round(p.price / p.seeds).toLocaleString('ko-KR')}원
+                개당 {Math.round(p.price / p.seeds).toLocaleString('ko-KR')}원
               </span>
               <span className="product-price">{p.price.toLocaleString('ko-KR')}원</span>
             </button>
