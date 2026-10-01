@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { pixelFont } from './fonts';
+import { SiteFooter } from './components/SiteFooter';
 
 export const metadata: Metadata = {
     title: '교정햄',
@@ -38,7 +39,11 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {/* 내용이 짧은 화면에서도 바닥글이 화면 맨 아래에 붙도록, 내용을 한 칸에 모아 늘린다 */}
+        <div className="site-body">{children}</div>
+        <SiteFooter />
+      </body>
     </html>
   );
 }

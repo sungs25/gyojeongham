@@ -330,7 +330,9 @@ export default function WritePage() {
         </div>
         <div className="bar">
           <span className="meta">
-              {shownDraft.length.toLocaleString()}자
+            {shownDraft.length.toLocaleString()}자
+            {/* AI 기본법 31조②: 맡기기 전에 생성형 AI가 교정한다는 것을 알린다 (결과마다 붙일 필요는 없다) */}
+            {' · 교정은 생성형 AI가 합니다'}
           </span>
           <button
             className="primary"
@@ -414,8 +416,6 @@ export default function WritePage() {
                 </section>
       </div>
 
-      {/* AI 기본법 31조②: 생성형 AI가 만든 결과물임을 알린다 */}
-      <p className="ai-note">AI가 만든 교정 결과입니다.</p>
       <aside className={`panel ${panelOpen ? 'open' : ''}`} inert={!panelOpen}>
         <header className="panel-head">
           <span>변경 {state.changes.length}건</span>

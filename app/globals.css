@@ -83,13 +83,6 @@ button { font: inherit; cursor: pointer; }
   color: var(--ink-soft);
 }
 
-.ai-note {
-  margin: 0;
-  padding: 0.75rem var(--gap);
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-
 .text {
   white-space: pre-wrap;
   word-break: break-word;
@@ -560,6 +553,7 @@ button { font: inherit; cursor: pointer; }
   box-shadow: 0 0 0 6px var(--paper);
 }
 .panel-open .hamster-float { display: none; }
+
 /* 마지막 줄까지 햄스터 위로 올려 읽을 수 있게 */
 .page:has(.hamster-float) { padding-bottom: calc(var(--bar-h) + 8rem); }
 
@@ -942,3 +936,50 @@ html[data-resuming] .page::after {
     .product:hover:not(:disabled):not(.on) { background: var(--sun-wash); }
     .account-price:hover { color: var(--red); }
   }
+
+  
+
+/* 바닥글: 교정 화면을 뺀 모든 화면 맨 아래 약관 링크 (6-8) */
+/* 내용이 짧으면 내용 칸이 늘어나 바닥글을 화면 맨 아래로 민다 */
+body { display: flex; flex-direction: column; min-height: 100dvh; }
+.site-body { flex: 1 0 auto; }
+.site-footer {
+  padding: 1.5rem var(--gap) 2rem;
+  border-top: 2px solid var(--ink);
+  background: var(--paper);
+  font-size: 0.85rem;
+}
+.footer-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
+.footer-links a { color: var(--ink-soft); text-decoration: none; }
+.footer-links a.footer-privacy { color: var(--ink); font-weight: 800; }
+/* 교정 화면(입력·결과)은 아래 바와 햄스터가 화면에 붙어 있는 작업 화면이라 바닥글을 두지 않는다 */
+.site-body:has(> .page) + .site-footer { display: none; }
+@media (hover: hover) {
+  .footer-links a:hover { color: var(--red); }
+}
+
+/* 약관 화면: 모눈 바탕 위 카드 한 장 (6-8) */
+.doc-page { padding-bottom: 3rem; }
+/* 글이 짧아도 모눈이 바닥글까지 이어지게, 늘어나는 내용 칸에 모눈을 깐다 */
+.site-body:has(> .doc-page) {
+  background-color: var(--paper);
+  background-image: var(--grid-bg);
+  background-size: 24px 24px;
+}
+.doc {
+  max-width: 44rem;
+  margin: 2rem auto 0;
+  padding: 2rem 1.75rem;
+  background: var(--sheet);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 6px 6px 0 var(--ink);
+  line-height: 1.8;
+  word-break: keep-all;
+}
+.doc h1 { margin: 0 0 1rem; font-size: 1.6rem; font-weight: 850; letter-spacing: -0.5px; }
+.doc h2 { margin: 2rem 0 0.5rem; font-size: 1.1rem; font-weight: 800; }
+.doc p, .doc li { font-size: 0.95rem; }
+@media (max-width: 46rem) {
+  .doc { margin: 1.5rem 1rem 0; padding: 1.5rem 1.25rem; }
+}
