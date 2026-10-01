@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { PaymentWidget } from './PaymentWidget';
@@ -31,6 +32,20 @@ export default async function CreditsPage() {
         <strong>{provider} 계정</strong>으로 로그인되어 있습니다.
       </p>
       <PaymentWidget customerKey={claims.sub} />
+      {/* 전자상거래법 17조⑥: 청약철회가 안 되는 부분(쓴 씨앗)을 결제 화면에서 명확히 알리고,
+          어떤 결과가 나오는지 첫 화면 예시로 안내한다(시행령 21조의2 정보 제공).
+          13조③: 미성년자에게 법정대리인 동의 없는 결제는 취소할 수 있다고 알린다 */}
+      <ul className="credits-refund">
+        <li>
+          <strong>쓴 씨앗은 교정을 받은 것이라 환불되지 않습니다.</strong> 교정 결과가 어떻게
+          나오는지는 <Link href="/">첫 화면 예시</Link>에서 볼 수 있습니다.
+        </li>
+        <li>
+          쓰지 않은 씨앗은 산 지 7일 안이면 전액, 그 뒤에는 10%를 빼고 환불합니다.{' '}
+          <Link href="/refund">환불 정책</Link>
+        </li>
+        <li>미성년자가 법정대리인의 동의 없이 결제한 경우, 본인 또는 법정대리인이 취소할 수 있습니다.</li>
+      </ul>
     </main>
     </>
   );

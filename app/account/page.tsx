@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { SiteHeader } from '@/app/components/SiteHeader';
@@ -35,8 +36,11 @@ export default async function AccountPage() {
       <LogoutButton />
       <h2 className="account-danger-title">회원 탈퇴</h2>
       <ul className="credits-note account-danger-list">
-        <li>탈퇴하면 남은 씨앗은 모두 사라지고 되돌릴 수 없습니다.</li>
-        <li>구매한 씨앗의 환불을 원하시면 탈퇴 전에 먼저 요청해 주세요.</li>
+        <li>탈퇴하면 계정을 되돌릴 수 없고, 무료 씨앗은 사라집니다.</li>
+        <li>
+          남은 유료 씨앗은 탈퇴한 뒤에도 <Link href="/refund">환불 정책</Link>에 따라 환불을 요청할
+          수 있습니다.
+        </li>
         <li>결제 기록은 전자상거래법에 따라 5년간 보관한 뒤 파기합니다.</li>
         <li>같은 소셜 계정으로 다시 로그인하면 새 계정으로 가입됩니다.</li>
       </ul>

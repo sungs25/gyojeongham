@@ -471,10 +471,16 @@ button { font: inherit; cursor: pointer; }
 
 .credits-error { margin: var(--gap) 0 0; font-size: 0.85rem; color: var(--red); }
 
+/* 결제 버튼 아래 환불·미성년자 안내 (전자상거래법 13조③·17조⑥) */
+.credits-refund { margin: 1.25rem 0 0; padding-left: 1.2rem; font-size: 0.85rem; line-height: 1.7; color: var(--ink-soft); }
+.credits-refund li + li { margin-top: 0.25rem; }
+.credits-refund strong, .credits-refund a { color: var(--ink); }
+
 
 /* 내 계정 (6단계) */
 .account-danger-title { margin: calc(var(--gap) * 2) 0 0.5rem; font-size: 1.05rem; }
 .account-danger-list { padding-left: 1.2rem; }
+.account-danger-list a { color: var(--ink); }
 .account-confirm { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
 .account-delete { margin-top: var(--gap); color: var(--red); border-color: var(--red); box-shadow: none; }
 
@@ -980,6 +986,9 @@ body { display: flex; flex-direction: column; min-height: 100dvh; }
 .doc h1 { margin: 0 0 1rem; font-size: 1.6rem; font-weight: 850; letter-spacing: -0.5px; }
 .doc h2 { margin: 2rem 0 0.5rem; font-size: 1.1rem; font-weight: 800; }
 .doc p, .doc li { font-size: 0.95rem; }
+.doc ul { margin: 0; padding-left: 1.25rem; }
+.doc li + li { margin-top: 0.35rem; }
+.doc a { color: var(--red); }
 @media (max-width: 46rem) {
   .doc { margin: 1.5rem 1rem 0; padding: 1.5rem 1.25rem; }
 }
