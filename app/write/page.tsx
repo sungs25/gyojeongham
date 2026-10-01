@@ -77,6 +77,8 @@ export default function WritePage() {
 
   // 본문 하이라이트: 같은 변경을 다시 누르면 선택 해제, 새로 누르면 선택하고 패널을 연다
   function toggleFocus(id: string) {
+    // 교정 중에는 패널을 열지 않는다 (변경 목록이 아직 다 모이지 않았다)
+    if (state.running) return;
     if (focusedId === id) {
       setFocusedId(null);
       return;
@@ -409,9 +411,11 @@ export default function WritePage() {
               ),
             )}
           </div>
-        </section>
+                </section>
       </div>
 
+      {/* AI 기본법 31조②: 생성형 AI가 만든 결과물임을 알린다 */}
+      <p className="ai-note">AI가 만든 교정 결과입니다.</p>
       <aside className={`panel ${panelOpen ? 'open' : ''}`} inert={!panelOpen}>
         <header className="panel-head">
           <span>변경 {state.changes.length}건</span>
@@ -512,7 +516,11 @@ export default function WritePage() {
           {DEV_METRICS && ` · 캐시 쓰기 ${u.cacheWrites}/읽기 ${u.cacheReads}`}
         </span>
         <span className="bar-actions">
-          <button className="ghost" onClick={() => setPanelOpen((v) => !v)}>
+          <button
+            className="ghost"
+            disabled={state.running}
+            onClick={() => setPanelOpen((v) => !v)}
+          >
             변경 목록
           </button>
           {/* 좁은 화면에서는 복사 버튼 셋을 "복사" 버튼 하나 아래로 접는다 */}
@@ -540,6 +548,8 @@ export default function WritePage() {
             onClick={() => {
               setNotice(null);
               setCopyOpen(false);
+              setPanelOpen(false);
+              setFocusedId(null);
               clearJob();
               dispatch({ type: 'reset' });
             }}
