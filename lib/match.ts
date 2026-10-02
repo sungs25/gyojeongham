@@ -69,11 +69,34 @@ export function matchChunkChanges(
       return;
     }
 
+    // 원문에 이미 있는 글자를 "빠졌다"며 다시 붙이는 변경은 버린다.
+    // 예: 원문 ‘바둑’은 에서 모델이 before를 바둑’은 으로 잡고 after를 ‘바둑’은 으로 주면
+    //     그대로 적용할 때 ‘‘바둑’은 이 된다
+    if (addsExistingText(source, found, raw.before, raw.after)) {
+      unmatched.push({ ...base, start: -1, end: -1 });
+      return;
+    }
+
     matched.push({ ...base, start: found, end: found + raw.before.length });
     cursors[foundPara] = found + raw.before.length;
   });
 
   return { matched, unmatched };
+}
+
+// after가 before 앞이나 뒤에 글자를 덧붙인 것뿐인데, 그 글자가 원문의 바로 그 자리에 이미 있으면 true
+function addsExistingText(source: string, start: number, before: string, after: string): boolean {
+  if (after.length <= before.length) return false;
+  const end = start + before.length;
+  if (after.endsWith(before)) {
+    const added = after.slice(0, after.length - before.length);
+    if (source.slice(start - added.length, start) === added) return true;
+  }
+  if (after.startsWith(before)) {
+    const added = after.slice(before.length);
+    if (source.slice(end, end + added.length) === added) return true;
+  }
+  return false;
 }
 
 /**
