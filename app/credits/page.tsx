@@ -38,7 +38,7 @@ export default async function CreditsPage() {
       <ul className="credits-refund">
         <li>
           <strong>쓴 씨앗은 교정을 받은 것이라 환불되지 않습니다.</strong> 교정 결과가 어떻게
-          나오는지는 <Link href="/">첫 화면 예시</Link>에서 볼 수 있습니다.
+          나오는지는 <Link href="/#sample">실제 교정 결과 예시</Link>에서 볼 수 있습니다.
         </li>
         <li>
           쓰지 않은 씨앗은 산 지 7일 안이면 전액, 그 뒤에는 10%를 빼고 환불합니다.{' '}

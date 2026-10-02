@@ -112,7 +112,7 @@ export default function Home() {
 
         {/* 실제로 맡긴 글 한 문단의 교정 결과. 사기 전에 어떤 결과가 나오는지 보여 준다
             (전자상거래법 시행령 21조의2: 청약철회가 안 되는 디지털콘텐츠의 미리보기) */}
-        <section className="lp-section lp-sample">
+        <section className="lp-section lp-sample" id="sample">
           <div className="lp-inner">
             <p className="lp-kicker">▸ 실제 교정 결과</p>
             <h2 className="lp-h2">이렇게 돌려드립니다</h2>

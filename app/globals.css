@@ -995,7 +995,7 @@ body { display: flex; flex-direction: column; min-height: 100dvh; }
 
 
 /* 첫 화면: 실제 교정 결과 예시 (6-8). 표시 모양은 결과 화면의 .mark를 그대로 쓴다 */
-.lp-sample { padding-top: 0; }
+.lp-sample { padding-top: 0; scroll-margin-top: 1.5rem; } /* 씨앗 사기 화면의 /#sample 링크로 왔을 때 제목이 화면 맨 위에 붙지 않게 */
 .lp-sample-lead { max-width: 40rem; margin: -1.5rem 0 2rem; font-size: 1rem; line-height: 1.7; color: var(--ink-soft); }
 .sample {
   background: var(--sheet);
