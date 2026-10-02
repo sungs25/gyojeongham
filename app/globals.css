@@ -1042,3 +1042,22 @@ body { display: flex; flex-direction: column; min-height: 100dvh; }
   .sample-pane, .sample-note { padding-left: 1.1rem; padding-right: 1.1rem; }
   .lp-sample-lead { margin-top: -0.75rem; font-size: 0.95rem; }
 }
+
+/* 개인정보 처리방침의 위탁·국외 이전: 업체마다 항목 이름과 내용을 두 칸으로 쌓는다 */
+.doc-processor {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: 0.3rem 0.75rem;
+  margin: 0.75rem 0;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+}
+.doc-processor dt { font-weight: 800; color: var(--ink-soft); }
+.doc-processor dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+  .doc-processor { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .doc-processor dd + dt { margin-top: 0.45rem; }
+}
