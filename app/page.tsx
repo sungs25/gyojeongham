@@ -1,5 +1,6 @@
 import { SiteHeader } from '@/app/components/SiteHeader';
 import { Hamster } from '@/app/components/Hamster';
+import { SampleResult } from '@/app/components/SampleResult';
 import { penFont } from '@/app/fonts';
 import { PRODUCTS } from '@/lib/products';
 
@@ -106,6 +107,20 @@ export default function Home() {
                 </li>
               ))}
             </ol>
+          </div>
+        </section>
+
+        {/* 실제로 맡긴 글 한 문단의 교정 결과. 사기 전에 어떤 결과가 나오는지 보여 준다
+            (전자상거래법 시행령 21조의2: 청약철회가 안 되는 디지털콘텐츠의 미리보기) */}
+        <section className="lp-section lp-sample">
+          <div className="lp-inner">
+            <p className="lp-kicker">▸ 실제 교정 결과</p>
+            <h2 className="lp-h2">이렇게 돌려드립니다</h2>
+            <p className="lp-sample-lead">
+              실제로 맡긴 글 한 문단과 교정햄이 돌려준 결과를 그대로 옮겼습니다. 표시한 곳을 누르면
+              고친 이유가 나옵니다.
+            </p>
+            <SampleResult />
           </div>
         </section>
 

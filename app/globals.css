@@ -992,3 +992,53 @@ body { display: flex; flex-direction: column; min-height: 100dvh; }
 @media (max-width: 46rem) {
   .doc { margin: 1.5rem 1rem 0; padding: 1.5rem 1.25rem; }
 }
+
+
+/* 첫 화면: 실제 교정 결과 예시 (6-8). 표시 모양은 결과 화면의 .mark를 그대로 쓴다 */
+.lp-sample { padding-top: 0; }
+.lp-sample-lead { max-width: 40rem; margin: -1.5rem 0 2rem; font-size: 1rem; line-height: 1.7; color: var(--ink-soft); }
+.sample {
+  background: var(--sheet);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+/* 카드에 overflow: hidden을 걸면 좁은 화면의 고친 이유 칸이 sticky로 붙지 않으므로, 모서리는 칸마다 둥글린다 */
+.sample-split { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; overflow: hidden; background: var(--ink); border-bottom: 2px solid var(--ink); border-radius: 8px 8px 0 0; }
+.sample-pane { min-width: 0; padding: 1.25rem 1.5rem; background: var(--sheet); }
+.sample-text { margin: 0; font-size: 1rem; line-height: 1.9; }
+/* 고친 이유: 결과 화면 패널처럼 왼쪽 노란 띠. 이유 길이가 달라도 카드 높이가 덜 출렁이게 높이를 잡아 둔다 */
+.sample-note { min-height: 8.5rem; padding: 1rem 1.5rem 1.25rem; background: #fff; border-radius: 0 0 8px 8px; box-shadow: inset 4px 0 0 var(--sun); }
+.sample-rules {
+  display: inline-block;
+  margin: 0 0 0.5rem;
+  padding: 2px 6px;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--sun-wash);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+}
+.sample-diff { margin: 0 0 0.35rem; font-size: 0.95rem; line-height: 1.6; }
+.sample-diff del { background: var(--red-wash); text-decoration-color: var(--red); }
+.sample-diff ins { background: var(--sun-wash); text-decoration: none; }
+.sample-why { margin: 0; font-size: 0.9rem; line-height: 1.6; color: var(--ink-soft); }
+.sample-tabs { display: none; }
+/* 결과 화면(.split)과 같은 900px에서 한 칸씩 보이게 바꾼다 */
+@media (max-width: 900px) {
+  .sample-split { grid-template-columns: minmax(0, 1fr); }
+  .sample-tabs { display: flex; overflow: hidden; border-bottom: 2px solid var(--ink); border-radius: 8px 8px 0 0; }
+  .sample-split { border-bottom: none; border-radius: 0; }
+  /* 위쪽 표시를 눌러도 고친 이유가 보이도록, 카드가 화면에 있는 동안 이유 칸을 화면 아래에 붙인다 */
+  .sample-note { position: sticky; bottom: 0; min-height: 0; border-top: 2px solid var(--ink); }
+  .sample-tabs button { all: unset; flex: 1; padding: 0.7rem 0; text-align: center; font-size: 0.95rem; font-weight: 700; color: var(--ink-soft); cursor: pointer; }
+  .sample-tabs button + button { border-left: 2px solid var(--ink); }
+  .sample-tabs button[aria-pressed='true'] { color: var(--ink); background: var(--sun); }
+  .sample-tabs button:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+  .sample-pane:not(.on) { display: none; }
+  .sample-pane .pane-title { display: none; }
+  .sample-pane, .sample-note { padding-left: 1.1rem; padding-right: 1.1rem; }
+  .lp-sample-lead { margin-top: -0.75rem; font-size: 0.95rem; }
+}
