@@ -316,7 +316,14 @@ button { font: inherit; cursor: pointer; }
 }
 .login .hamster { margin-bottom: 0.5rem; }
 .login h1 { margin: 0 0 0.25rem; font-size: 1.5rem; font-weight: 850; letter-spacing: -0.5px; }
-.login-error { margin: 0; font-size: 0.85rem; color: var(--red); }
+.login-error { margin: 0; font-size: 0.85rem; color: var(--red); word-break: keep-all; }
+.login-terms { margin: 0.25rem 0 0; font-size: 0.8rem; line-height: 1.6; color: var(--ink-soft); word-break: keep-all; }
+.login-terms a { color: var(--ink); }
+/* 만 14세 이상 확인 (이용약관 제4조) */
+.login-age { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.login-age input { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: var(--ink); }
+.login-terms { margin: 0.25rem 0 0; font-size: 0.8rem; line-height: 1.6; color: var(--ink-soft); word-break: keep-all; }
+.login-terms a { color: var(--ink); }
 @media (max-width: 480px) {
   .login { margin: 2rem 1rem 0; }
 }

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { LoginButtons } from './LoginButtons';
@@ -26,6 +27,11 @@ export default async function LoginPage({
         <h1>교정햄 로그인</h1>
         {error && <p className="login-error">로그인에 실패했습니다. 다시 시도해 주세요.</p>}
         <LoginButtons />
+          {/* 약관규제법 제3조: 가입할 때 약관을 분명히 밝힌다 */}
+          <p className="login-terms">
+            로그인하면 <Link href="/terms">이용약관</Link>에 동의하고{' '}
+            <Link href="/privacy">개인정보 처리방침</Link>을 확인한 것으로 봅니다.
+          </p>
       </main>
     </div>
   );
