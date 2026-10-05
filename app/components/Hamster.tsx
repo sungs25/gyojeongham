@@ -5,7 +5,7 @@ import Image from 'next/image';
 const W = 31;
 const H = 49;
 
-export type HamsterScene = 'ready' | 'working' | 'done' | 'seed';
+export type HamsterScene = 'ready' | 'working' | 'done' | 'seed' | 'cry';
 
 // working은 두 장을 번갈아 보여준다 (눈동자가 왼쪽·오른쪽 종이를 오간다)
 const FRAMES: Record<HamsterScene, string[]> = {
@@ -13,6 +13,7 @@ const FRAMES: Record<HamsterScene, string[]> = {
   working: ['/hamster/working-a.png', '/hamster/working-b.png'],
   done: ['/hamster/done.png'],
   seed: ['/hamster/seed.png'],
+  cry: ['/hamster/cry.png'],
 };
 
 // 미리 받아 둘 그림 전체 (preload용)

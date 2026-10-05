@@ -485,11 +485,78 @@ button { font: inherit; cursor: pointer; }
 
 
 /* 내 계정 (6단계) */
-.account-danger-title { margin: calc(var(--gap) * 2) 0 0.5rem; font-size: 1.05rem; }
+.account-title, .account-danger-title { margin: calc(var(--gap) * 2) 0 0.5rem; font-size: 1.05rem; }
 .account-danger-list { padding-left: 1.2rem; }
 .account-danger-list a { color: var(--ink); }
-.account-confirm { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
 .account-delete { margin-top: var(--gap); color: var(--red); border-color: var(--red); box-shadow: none; }
+
+/* 구매 내역 (6-4): 결제 한 건 = 카드 하나. 내 계정·결제 완료·탈퇴 완료 화면이 같이 쓴다 */
+.purchases { list-style: none; margin: 0 0 var(--gap); padding: 0; display: grid; gap: 0.75rem; }
+.purchase {
+  padding: 0.8rem 1rem;
+  background: var(--sheet);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+/* 카드 화면(.status-card p)의 문단 여백·색을 이긴다 */
+.purchase .purchase-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.purchase-head span { font-weight: 850; }
+.purchase-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 0.3rem 0.9rem;
+  margin: 0 0 var(--gap);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+.purchase .purchase-facts { margin: 0; }
+.purchase-facts dt { color: var(--ink-soft); white-space: nowrap; }
+.purchase-facts dd { margin: 0; min-width: 0; }
+/* 주문번호: 36자라 좁은 화면에서는 아무 데서나 줄을 바꾸고, 한 번 누르면 전체가 골라진다 */
+.order-number { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; }
+.order-number code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  word-break: break-all;
+  user-select: all;
+}
+/* 결제 완료·탈퇴 완료 카드는 구매 내역이 들어가서 조금 넓게 */
+.status-card.order-card { max-width: 32rem; }
+.order-card .credits-refund { margin: 0 0 1.5rem; }
+/* 한국어가 낱말 중간에서 줄이 바뀌지 않게, 링크는 본문색으로 */
+.credits-note, .credits-refund, .order-card p { word-break: keep-all; }
+.credits-note a, .order-card p a { color: var(--ink); }
+
+
+/* 탈퇴 확인 창: 카드 화면과 같은 모양 */
+.confirm-dialog {
+  width: calc(100% - 2rem);
+  max-width: 24rem;
+  padding: 1.5rem;
+  background: var(--sheet);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.confirm-dialog::backdrop { background: rgba(43, 32, 25, 0.45); }
+.confirm-dialog .hamster { margin-bottom: 1rem; }
+.confirm-dialog h2 { margin: 0 0 0.5rem; font-size: 1.25rem; font-weight: 850; letter-spacing: -0.5px; }
+.confirm-dialog p { margin: 0 0 1.25rem; font-size: 0.9rem; line-height: 1.7; color: var(--ink-soft); word-break: keep-all; }
+.confirm-dialog .credits-error { margin: 0 0 1rem; color: var(--red); }
+.confirm-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
+.confirm-actions .account-delete { margin-top: 0; }
 
 
 /* 햄스터 도트 그림: 확대해도 칸이 번지지 않게 */

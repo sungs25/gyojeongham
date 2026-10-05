@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { PURCHASE_COLUMNS } from '@/lib/purchases';
 
 export const runtime = 'nodejs';
 
@@ -15,6 +16,37 @@ export async function POST() {
     return Response.json({ error: '로그인이 필요합니다.', code: 'UNAUTHORIZED' }, { status: 401 });
   }
 
+  // 교정 중에는 탈퇴하지 않는다. 잡아 둔 씨앗이 묶음으로 돌아온 뒤에야 남은 씨앗을 바로 셀 수 있다
+  const { data: running, error: jobError } = await supabase
+    .from('jobs')
+    .select('id')
+    .eq('status', 'held')
+    .limit(1);
+  if (jobError) {
+    console.error('탈퇴 전 교정 확인 실패', jobError);
+    return Response.json({ error: '탈퇴를 처리하지 못했습니다.', code: 'SERVER' }, { status: 500 });
+  }
+  if (running.length > 0) {
+    return Response.json(
+      { error: '교정이 끝난 뒤에 탈퇴할 수 있습니다.', code: 'JOB_RUNNING' },
+      { status: 409 },
+    );
+  }
+
+  // 탈퇴하면 이 계정의 구매 내역을 다시 볼 수 없다. 환불받을 수 있는 주문
+  // (이용 기간이 남고 씨앗이 남은 결제)을 탈퇴 전에 읽어 두었다가 탈퇴를 마친 화면에 보여 준다.
+  // 읽지 못하면 주문번호를 알려 드릴 수 없으므로 탈퇴하지 않는다
+  const { data: refundable, error: listError } = await supabase
+    .from('purchases')
+    .select(PURCHASE_COLUMNS)
+    .eq('expired', false)
+    .gt('remaining', 0)
+    .order('paid_at', { ascending: false });
+  if (listError) {
+    console.error('탈퇴 전 구매 내역 읽기 실패', listError);
+    return Response.json({ error: '탈퇴를 처리하지 못했습니다.', code: 'SERVER' }, { status: 500 });
+  }
+
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.deleteUser(userId, true);
   if (error) {
@@ -22,5 +54,5 @@ export async function POST() {
     return Response.json({ error: '탈퇴를 처리하지 못했습니다.', code: 'SERVER' }, { status: 500 });
   }
 
-  return Response.json({ ok: true });
+  return Response.json({ ok: true, refundable });
 }
