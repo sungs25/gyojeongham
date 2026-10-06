@@ -34,12 +34,12 @@ export async function POST() {
   }
 
   // 탈퇴하면 이 계정의 구매 내역을 다시 볼 수 없다. 환불받을 수 있는 주문
-  // (이용 기간이 남고 씨앗이 남은 결제)을 탈퇴 전에 읽어 두었다가 탈퇴를 마친 화면에 보여 준다.
+  // (환불 기한이 남고 씨앗이 남은 결제)을 탈퇴 전에 읽어 두었다가 탈퇴를 마친 화면에 보여 준다.
   // 읽지 못하면 주문번호를 알려 드릴 수 없으므로 탈퇴하지 않는다
   const { data: refundable, error: listError } = await supabase
     .from('purchases')
     .select(PURCHASE_COLUMNS)
-    .eq('expired', false)
+    .eq('refundable', true)
     .gt('remaining', 0)
     .order('paid_at', { ascending: false });
   if (listError) {

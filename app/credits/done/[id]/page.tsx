@@ -98,7 +98,9 @@ export default async function OrderDonePage(props: PageProps<'/credits/done/[id]
           <dt>결제 일시</dt>
           <dd>{formatDateTime(purchase.paid_at)}</dd>
           <dt>이용 기간</dt>
-          <dd>{formatDate(purchase.expires_at)}까지 (산 날부터 5년)</dd>
+          <dd>{formatDate(purchase.expires_at)}까지 (산 날부터 1년)</dd>
+          <dt>환불 기한</dt>
+          <dd>{formatDate(purchase.refund_until)}까지 (쓰지 않은 씨앗, 산 날부터 5년)</dd>
           <dt>주문번호</dt>
           <dd>
             <OrderNumber id={purchase.order_id} />
