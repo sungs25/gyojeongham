@@ -30,6 +30,10 @@ export default async function AccountPage() {
   if (purchaseError) console.error('구매 내역 읽기 실패', purchaseError);
   const purchases = purchaseError ? null : ((purchaseRows ?? []) as Purchase[]);
 
+  // 쓰거나 환불받을 수 있는 씨앗이 남은 결제는 펼쳐 두고, 나머지(다 썼거나 환불 기한이 끝난 결제)는 접어 둔다
+  const active = purchases?.filter((p) => p.remaining > 0 && p.refundable) ?? [];
+  const past = purchases?.filter((p) => !(p.remaining > 0 && p.refundable)) ?? [];
+
   const provider = PROVIDER_NAMES[claims.app_metadata?.provider ?? ''] ?? '소셜';
 
   return (
@@ -52,7 +56,17 @@ export default async function AccountPage() {
         <p className="credits-note">아직 산 씨앗이 없습니다.</p>
       ) : (
         <>
-          <PurchaseList purchases={purchases} />
+          {active.length > 0 ? (
+            <PurchaseList purchases={active} />
+          ) : (
+            <p className="credits-note">쓰거나 환불받을 수 있는 씨앗이 남은 결제가 없습니다.</p>
+          )}
+          {past.length > 0 && (
+            <details className="past-purchases">
+              <summary>지난 결제 {past.length}건 보기</summary>
+              <PurchaseList purchases={past} />
+            </details>
+          )}
           <p className="credits-note">
             환불을 요청할 때는 주문번호를 알려 주세요. <Link href="/refund">환불 정책</Link>
           </p>

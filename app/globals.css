@@ -523,6 +523,27 @@ button { font: inherit; cursor: pointer; }
 .purchase .purchase-facts { margin: 0; }
 .purchase-facts dt { color: var(--ink-soft); white-space: nowrap; }
 .purchase-facts dd { margin: 0; min-width: 0; }
+
+/* 지난 결제(다 썼거나 환불 기한이 끝난 결제)는 내 계정 화면에서 접어 둔다 */
+.past-purchases { margin: 0 0 var(--gap); }
+.past-purchases summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: var(--sheet);
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 var(--ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+.past-purchases summary::-webkit-details-marker { display: none; }
+.past-purchases summary::before { content: '▸'; color: var(--red); }
+.past-purchases[open] summary { margin-bottom: 0.75rem; }
+.past-purchases[open] summary::before { content: '▾'; }
 /* 주문번호: 36자라 좁은 화면에서는 아무 데서나 줄을 바꾸고, 한 번 누르면 전체가 골라진다 */
 .order-number { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; }
 .order-number code {
