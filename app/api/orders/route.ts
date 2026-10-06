@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     return Response.json({ error: '없는 상품입니다.', code: 'BAD_PRODUCT' }, { status: 400 });
   }
 
-  // 3. 주문을 만든다 (하루 한도는 DB 함수가 검사)
+  // 3. 주문을 만든다
   const admin = createAdminClient();
   const { data: orderId, error } = await admin.rpc('create_order', {
     p_user: userId,
@@ -31,12 +31,6 @@ export async function POST(request: Request) {
   });
 
   if (error || typeof orderId !== 'string') {
-    if (error?.message.includes('DAILY_LIMIT')) {
-      return Response.json(
-        { error: '하루 결제 한도(5만 원 미만)를 넘어 결제할 수 없습니다.', code: 'DAILY_LIMIT' },
-        { status: 403 },
-      );
-    }
     console.error('create_order 실패', error);
     return Response.json({ error: '주문을 만들지 못했습니다.', code: 'SERVER' }, { status: 500 });
   }
