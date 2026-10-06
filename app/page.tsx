@@ -2,7 +2,7 @@ import { SiteHeader } from '@/app/components/SiteHeader';
 import { Hamster } from '@/app/components/Hamster';
 import { SampleResult } from '@/app/components/SampleResult';
 import { penFont } from '@/app/fonts';
-import { PRODUCTS } from '@/lib/products';
+import { CHARS_PER_SEED, PRODUCTS } from '@/lib/products';
 
 const STEPS = [
   { scene: 'ready', title: '글을 붙여 넣습니다', text: '한 번에 20만 자까지 넣을 수 있습니다.' },
@@ -16,6 +16,10 @@ const STEPS = [
 
 const RULES = [
   { title: '산 날부터 5년', text: '씨앗은 산 날부터 5년 동안 쓸 수 있습니다.' },
+  {
+    title: '교정에만 씁니다',
+    text: '씨앗은 교정 이용권이라 현금으로 바꾸거나 다른 계정에 넘길 수 없습니다.',
+  },
   {
     title: '실패하면 돌려드립니다',
     text: '끝내 고치지 못한 문단이 있으면 그 글에 쓴 씨앗을 모두 돌려드립니다.',
@@ -148,6 +152,9 @@ export default function Home() {
                   <span className="lp-product-body">
                     <span className="lp-product-seeds">
                       씨앗 <b>{p.seeds}개</b>
+                    </span>
+                    <span className="lp-product-chars">
+                      {(p.seeds * CHARS_PER_SEED).toLocaleString('ko-KR')}자까지
                     </span>
                     <span className="lp-product-price">{p.price.toLocaleString('ko-KR')}원</span>
                     <span className="lp-product-unit">

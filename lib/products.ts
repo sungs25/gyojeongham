@@ -17,3 +17,6 @@ export const PRODUCTS: Product[] = [
 export function findProduct(id: string): Product | undefined {
   return PRODUCTS.find((p) => p.id === id);
 }
+
+// 씨앗 1개로 교정하는 글자 수. DB(006_seed_3000.sql)의 씨앗 계산과 같은 값이어야 한다
+export const CHARS_PER_SEED = 3000;

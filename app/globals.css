@@ -909,9 +909,10 @@ html[data-resuming] .page::after {
 .lp-product-body { display: flex; flex-direction: column; gap: 4px; padding: 18px 16px 20px; }
 .lp-product-seeds { font-size: 0.95rem; color: var(--ink-soft); }
 .lp-product-seeds b { color: var(--ink); }
+.lp-product-chars { font-size: 0.8rem; color: var(--ink-soft); }
 .lp-product-price { font-size: 1.75rem; font-weight: 850; letter-spacing: -0.5px; }
 .lp-product-unit { font-size: 0.8rem; color: var(--ink-soft); }
-.lp-rules { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.75rem; margin: 0; padding: 0; list-style: none; }
+.lp-rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.75rem; margin: 0; padding: 0; list-style: none; }
 .lp-rules li { display: flex; flex-direction: column; gap: 6px; padding-top: 14px; border-top: 2px solid var(--ink); }
 .lp-rules strong { font-size: 1.05rem; font-weight: 800; }
 .lp-rules span { font-size: 0.9rem; line-height: 1.7; color: var(--ink-soft); }
