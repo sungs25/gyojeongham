@@ -478,6 +478,29 @@ button { font: inherit; cursor: pointer; }
 
 .credits-error { margin: var(--gap) 0 0; font-size: 0.85rem; color: var(--red); }
 
+
+/* 구매자 정보: KG이니시스 PC 결제창은 이름·휴대폰 번호·이메일이 필수다 */
+.buyer { display: grid; gap: 0.75rem; min-width: 0; margin: 0 0 var(--gap); padding: 0; border: 0; }
+.buyer legend { margin-bottom: 0.25rem; padding: 0; font-size: 1rem; font-weight: 800; }
+.buyer label { display: grid; gap: 0.3rem; font-size: 0.85rem; font-weight: 700; }
+/* 1rem 아래로 내리면 아이폰이 입력할 때 화면을 확대한다 */
+.buyer input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--sheet);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+}
+.buyer input:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
+.buyer-note { margin: 0; font-size: 0.8rem; line-height: 1.6; color: var(--ink-soft); word-break: keep-all; }
+/* 결제 동의 (미리 체크하지 않는다) */
+.credits-agree { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; font-weight: 600; line-height: 1.5; cursor: pointer; word-break: keep-all; }
+.credits-agree input { flex: none; width: 1.05rem; height: 1.05rem; margin: 0.15rem 0 0; accent-color: var(--ink); }
+
 /* 결제 버튼 아래 환불·미성년자 안내 (전자상거래법 13조③·17조⑥) */
 .credits-refund { margin: 1.25rem 0 0; padding-left: 1.2rem; font-size: 0.85rem; line-height: 1.7; color: var(--ink-soft); }
 .credits-refund li + li { margin-top: 0.25rem; }
