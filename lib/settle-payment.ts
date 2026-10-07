@@ -40,6 +40,13 @@ export async function settlePayment(orderId: string): Promise<SettleResult> {
     return 'not_paid';
   }
 
+  // 테스트 채널 결제는 실제 돈이 나가지 않는다. 출시 전 확인용이라 운영자가 정한 계정(PORTONE_TEST_USERS)에만 씨앗을 준다.
+  // 공개된 배포 주소에서 아무나 테스트 결제로 씨앗을 받아 교정(실제 API 비용)을 돌리는 것을 막는다
+  if (payment.channel.type !== 'LIVE' && !testUsers().includes(order.user_id)) {
+    console.error('허용하지 않은 계정의 테스트 결제', { orderId, user: order.user_id });
+    return 'not_paid';
+  }
+
   if (payment.currency !== 'KRW' || payment.amount.total !== order.amount) {
     await portone.cancelPayment({
       paymentId: orderId,
@@ -62,4 +69,12 @@ export async function settlePayment(orderId: string): Promise<SettleResult> {
   });
   if (grantError) throw new Error(`씨앗 지급 실패: ${grantError.message}`);
   return 'paid';
+}
+
+// 테스트 결제로 씨앗을 받을 수 있는 계정 ID (쉼표로 구분). 비어 있으면 아무도 받지 못한다
+function testUsers(): string[] {
+  return (process.env.PORTONE_TEST_USERS ?? '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean);
 }
