@@ -4,6 +4,8 @@ import { pixelFont } from './fonts';
 import { SiteFooter } from './components/SiteFooter';
 
 export const metadata: Metadata = {
+    // 미리보기 그림 같은 상대 주소를 이 주소 기준의 절대 주소로 바꾼다
+    metadataBase: new URL('https://gyojeongham.com'),
     title: '교정햄',
     description: '글을 넣으면 고친 곳과 이유를 보여주는 한국어 교정 서비스',
     // 카카오톡·SNS에 주소를 붙였을 때 뜨는 미리보기. 그림은 app/opengraph-image.png
