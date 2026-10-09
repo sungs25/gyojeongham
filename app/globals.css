@@ -1077,12 +1077,26 @@ body { display: flex; flex-direction: column; min-height: 100dvh; }
 .footer-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
 .footer-links a { color: var(--ink-soft); text-decoration: none; }
 .footer-links a.footer-privacy { color: var(--ink); font-weight: 800; }
+/* 사업자 정보: 항목마다 한 덩어리로, 좁은 화면에서는 줄바꿈 */
+.footer-biz {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 1rem;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+.footer-biz a { color: inherit; text-decoration: none; }
 /* 교정 화면(입력·결과)은 아래 바와 햄스터가 화면에 붙어 있는 작업 화면이라 바닥글을 두지 않는다 */
 .site-body:has(> .page) + .site-footer { display: none; }
 @media (hover: hover) {
   .footer-links a:hover { color: var(--red); }
+  .footer-biz a:hover { color: var(--red); }
 }
-
 /* 약관 화면: 모눈 바탕 위 카드 한 장 (6-8) */
 .doc-page { padding-bottom: 3rem; }
 /* 글이 짧아도 모눈이 바닥글까지 이어지게, 늘어나는 내용 칸에 모눈을 깐다 */
