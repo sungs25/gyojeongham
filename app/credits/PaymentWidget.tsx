@@ -13,7 +13,8 @@ type OrderResponse = { orderId: string; amount: number; orderName: string };
 const PHONE = /^(010\d{8}|01[16789]\d{7,8})$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// 상품 고르기 + 구매자 정보 + 결제 동의 + 포트원 결제창(KG이니시스, 카드).
+// 상품 고르기 + 구매자 정보 + 결제 동의 + 포트원 결제창(KG이니시스, 카드·간편결제).
+// payMethod는 CARD지만 이니시스 카드 결제창에 간편결제가 기본으로 함께 나온다(숨기는 옵션 noeasypay를 쓰지 않음).
 // 결제가 끝나면 /credits/complete가 포트원에 결제를 조회해 씨앗을 주고 결제 완료 화면으로 보낸다.
 // failed: 결제창을 닫았거나 실패해 이 화면으로 돌아왔을 때의 사유 (/credits/complete가 붙여 준다)
 export function PaymentWidget({ defaultEmail, failed }: { defaultEmail: string; failed: string | null }) {
