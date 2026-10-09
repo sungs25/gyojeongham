@@ -1069,10 +1069,14 @@ html[data-resuming] .page::after {
 body { display: flex; flex-direction: column; min-height: 100dvh; }
 .site-body { flex: 1 0 auto; }
 .site-footer {
-  padding: 1.5rem var(--gap) 2rem;
+  /* 왼쪽 여백을 머리글(.site-header)과 같게 맞춘다 */
+  padding: 1.5rem 2.5rem 2rem;
   border-top: 2px solid var(--ink);
   background: var(--paper);
   font-size: 0.85rem;
+}
+@media (max-width: 480px) {
+  .site-footer { padding: 1.25rem 1rem 1.75rem; }
 }
 .footer-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
 .footer-links a { color: var(--ink-soft); text-decoration: none; }
