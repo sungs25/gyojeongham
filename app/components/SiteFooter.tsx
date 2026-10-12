@@ -6,8 +6,7 @@ const BUSINESS = {
   name: '교정햄',
   owner: '임성민',
   registrationNo: '593-15-03143',
-  // 통신판매업 신고번호. 구청 처리가 끝나면 신고증에 적힌 번호를 그대로 넣는다
-  mailOrderNo: null as string | null,
+  mailOrderNo: '제2026-고양일산동-1996호' as string | null,
   address: '경기도 고양시 일산동구 강석로 110, 511동 1401호',
   phone: '0507-1340-0205',
   email: 'gyojeongham2@gmail.com',
