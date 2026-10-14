@@ -16,6 +16,9 @@ export const metadata: Metadata = {
       locale: 'ko_KR',
       type: 'website',
     },
+    verification: {
+      other: { 'naver-site-verification': 'ecd5825c506d1820ea817fa302cdca3bb5c9d614' },
+    },
 };
 
    // 모바일 브라우저의 주소창 색을 바탕색(크림)에 맞춘다
