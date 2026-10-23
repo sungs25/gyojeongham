@@ -11,8 +11,8 @@ const BUSINESS = {
   phone: '0507-1340-0205',
   email: 'gyojeongham2@gmail.com',
   hosting: 'Vercel Inc.',
+  complaintOfficer: '임성민',
 };
-
 // 모든 화면 맨 아래 바닥글. 약관 세 가지로 가는 링크와 사업자 정보.
 export function SiteFooter() {
   return (
@@ -39,6 +39,13 @@ export function SiteFooter() {
         </li>
         <li>호스팅 제공 {BUSINESS.hosting}</li>
       </ul>
+      {/* KG이니시스 포인트충전 입점조건: 업체 책임 고지와 민원담당자(이름·연락처)를 사이트 하단에 둔다 */}
+      <p className="footer-notice">
+        모든 거래에 대한 책임과 환불, 민원 등은 {BUSINESS.name}에서 진행합니다.
+        <br />
+        민원담당자 {BUSINESS.complaintOfficer} ·{' '}
+        <a href={`tel:${BUSINESS.phone}`}>{BUSINESS.phone}</a>
+      </p>
     </footer>
   );
 }

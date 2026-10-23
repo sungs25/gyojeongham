@@ -1095,11 +1095,21 @@ body { display: flex; flex-direction: column; min-height: 100dvh; }
   word-break: keep-all;
 }
 .footer-biz a { color: inherit; text-decoration: none; }
+/* 업체 책임 고지·민원담당자 (이니시스 포인트충전 입점조건) */
+.footer-notice {
+  margin: 0.6rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+.footer-notice a { color: inherit; text-decoration: none; }
 /* 교정 화면(입력·결과)은 아래 바와 햄스터가 화면에 붙어 있는 작업 화면이라 바닥글을 두지 않는다 */
 .site-body:has(> .page) + .site-footer { display: none; }
 @media (hover: hover) {
   .footer-links a:hover { color: var(--red); }
   .footer-biz a:hover { color: var(--red); }
+  .footer-notice a:hover { color: var(--red); }
 }
 /* 약관 화면: 모눈 바탕 위 카드 한 장 (6-8) */
 .doc-page { padding-bottom: 3rem; }
