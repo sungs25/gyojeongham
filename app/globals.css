@@ -510,6 +510,9 @@ button { font: inherit; cursor: pointer; }
 /* 내 계정 (6단계) */
 .account-title, .account-danger-title { margin: calc(var(--gap) * 2) 0 0.5rem; font-size: 1.05rem; }
 .account-danger-list { padding-left: 1.2rem; }
+/* 씨앗 내역·로그아웃 버튼 줄 */
+.account-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.account-actions a.ghost { text-decoration: none; }
 .account-danger-list a { color: var(--ink); }
 .account-delete { margin-top: var(--gap); color: var(--red); border-color: var(--red); box-shadow: none; }
 

@@ -13,7 +13,7 @@ export function SeedHistoryList({ lines }: { lines: SeedHistoryLine[] }) {
           </div>
           <div className="seed-history-count">
             <strong className={line.delta < 0 ? 'minus' : undefined}>{formatDelta(line.delta)}</strong>
-            <span>남은 씨앗 {line.balance}</span>
+            <span>남은 씨앗 {line.balance}개</span>
           </div>
         </li>
       ))}

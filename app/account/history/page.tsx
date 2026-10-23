@@ -8,6 +8,9 @@ import { SeedHistoryList } from '@/app/components/SeedHistoryList';
 
 export const metadata: Metadata = { title: '씨앗 내역 — 교정햄' };
 
+// 처음에 펼쳐 보여 줄 최근 줄 수. 나머지는 "이전 내역 N건 보기"에 접는다
+const RECENT = 10;
+
 // 씨앗 내역: 충전·사용·반환·환불·소멸과 그때의 남은 씨앗 (KG이니시스 포인트충전 입점조건의 "포인트 차감 페이지").
 // 줄은 seed_history 뷰(021)가 만든다. 맨 아래 줄부터 더하고 빼면 맨 위의 남은 씨앗과 맞는다
 export default async function SeedHistoryPage() {
@@ -27,6 +30,8 @@ export default async function SeedHistoryPage() {
     .order('seq', { ascending: false });
   if (error) console.error('씨앗 내역 읽기 실패', error);
   const lines = error ? null : ((lineRows ?? []) as SeedHistoryLine[]);
+  const recent = lines?.slice(0, RECENT) ?? [];
+  const older = lines?.slice(RECENT) ?? [];
 
   return (
     <>
@@ -38,7 +43,7 @@ export default async function SeedHistoryPage() {
         <h1>씨앗 내역</h1>
         <p className="credits-note">
           남은 씨앗은 <strong>{balance}개</strong>입니다. 씨앗을 사고, 교정에 쓰고, 돌려받은 내역을 최근
-          것부터 보여 드립니다. 오른쪽 아래 숫자는 그 일이 있은 뒤 남은 씨앗입니다.
+          것부터 보여 드립니다.
         </p>
         <p className="credits-note">
           씨앗은 산 날부터 1년 동안 쓸 수 있으며, 1년 동안 쓰지 않은 씨앗은 소멸됩니다.{' '}
@@ -49,7 +54,15 @@ export default async function SeedHistoryPage() {
         ) : lines.length === 0 ? (
           <p className="credits-note">아직 씨앗 내역이 없습니다.</p>
         ) : (
-          <SeedHistoryList lines={lines} />
+          <>
+            <SeedHistoryList lines={recent} />
+            {older.length > 0 && (
+              <details className="past-purchases">
+                <summary>이전 내역 {older.length}건 보기</summary>
+                <SeedHistoryList lines={older} />
+              </details>
+            )}
+          </>
         )}
       </main>
     </>

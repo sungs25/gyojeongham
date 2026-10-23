@@ -46,9 +46,14 @@ export default async function AccountPage() {
       <h1>내 계정</h1>
       <p className="credits-note">
         <strong>{provider} 계정</strong>으로 로그인되어 있습니다. 남은 씨앗은{' '}
-        <strong>{balance}개</strong>입니다. <Link href="/account/history">씨앗 내역 보기</Link>
+        <strong>{balance}개</strong>입니다.
       </p>
-      <LogoutButton />
+      <div className="account-actions">
+        <Link className="ghost" href="/account/history">
+          씨앗 내역 보기
+        </Link>
+        <LogoutButton />
+      </div>
       <h2 className="account-title">구매 내역</h2>
       {purchases === null ? (
         <p className="credits-note">구매 내역을 불러오지 못했습니다. 잠시 뒤 새로 고쳐 주세요.</p>
