@@ -32,6 +32,10 @@ export default async function LoginPage({
             로그인하면 <Link href="/terms">이용약관</Link>에 동의하고{' '}
             <Link href="/privacy">개인정보 처리방침</Link>을 확인한 것으로 봅니다.
           </p>
+          {/* KG이니시스 심사: 메인 로그인 화면에서 심사용 로그인으로 들어갈 수 있어야 함 */}
+          <p className="login-terms">
+            <Link href="/login/review">심사용 로그인</Link>
+          </p>
       </main>
     </div>
   );
